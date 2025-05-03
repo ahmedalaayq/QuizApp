@@ -15,7 +15,7 @@ class QuizApp extends StatelessWidget {
         return GetMaterialApp(
           initialRoute: AppRoutes.splashView,
           debugShowCheckedModeBanner: false,
-          darkTheme: ThemeData.dark(),
+          darkTheme: ThemeData.light(),
           routes: RouterManager.mainAppRoutes,
             
       );

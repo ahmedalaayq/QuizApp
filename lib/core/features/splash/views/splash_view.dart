@@ -16,7 +16,7 @@ class SplashView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text('Q', style: AppTextStyles.onboardingStyle),
+            Text('Q', style: AppTextStyles.onboardingStyle.copyWith(color: AppColors.whiteColor)),
             CustomButton(
               radiusValue: 35,
               backgroundColor: AppColors.whiteColor,

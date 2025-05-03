@@ -13,10 +13,10 @@ class OnBoardingController {
     _pageController = PageController(initialPage: _currentDotIndex);
     pageCurve = Curves.easeInOut;
 
-    // _pageStreamController = StreamController<bool>.broadcast();
-    // _pageInputData = _pageStreamController.sink;
-    // _pageOutputData = _pageStreamController.stream;
-    // _pageInputData.add(isPageChanged);
+    _nextBtnStreamController = StreamController<int>.broadcast();
+    _nextBtnInputData = _nextBtnStreamController.sink;
+    _nextBtnOutputData = _nextBtnStreamController.stream;
+    _nextBtnInputData.add(_currentDotIndex);
   }
   static OnBoardingController onBoardingController = OnBoardingController();
   int _currentDotIndex = 0;
@@ -32,10 +32,10 @@ class OnBoardingController {
   PageController get pageController => _pageController;
   late Curve pageCurve;
 
-  // late StreamController<bool> _pageStreamController;
-  // late Sink<bool> _pageInputData;
-  // late Stream<bool> _pageOutputData;
-  // Stream<bool> get pageOutputData => _pageOutputData;
+  late StreamController<int> _nextBtnStreamController;
+  late Sink<int> _nextBtnInputData;
+  late Stream<int> _nextBtnOutputData;
+  Stream<int> get nextBtnOutputData => _nextBtnOutputData;
 
   List<CustomPageViewModel> customPageList = [
     CustomPageViewModel(
@@ -68,7 +68,13 @@ class OnBoardingController {
 
   void onTapNextButton() {
     final int maxDots = customPageList.length;
-    currentDotIndex < maxDots - 1 ? _currentDotIndex++ : null;
+    if (_currentDotIndex < maxDots - 1) {
+      _currentDotIndex++;
+      _nextBtnInputData.add(_currentDotIndex);
+    } else {
+      _currentDotIndex = 2;
+      _nextBtnInputData.add(_currentDotIndex);
+    }
     _dotsInputData.add(_currentDotIndex);
     _pageController.animateToPage(
       _currentDotIndex,

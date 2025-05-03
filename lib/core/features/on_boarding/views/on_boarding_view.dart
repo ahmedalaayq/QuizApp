@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/core/features/on_boarding/controller/on_boarding_controller.dart';
 import 'package:quiz_app/core/features/on_boarding/models/custom_page_view_model.dart';
+import 'package:quiz_app/core/features/on_boarding/widgets/custom_button_navbar.dart';
 import 'package:quiz_app/core/features/on_boarding/widgets/custom_dots_indicator.dart';
 import 'package:quiz_app/core/features/on_boarding/widgets/custom_page_view.dart';
 import 'package:quiz_app/core/features/on_boarding/widgets/custom_text_button.dart';
@@ -24,33 +25,13 @@ class _OnBoardingViewState extends State<OnBoardingView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      bottomNavigationBar: SizedBox(
-        width: 90,
-        height: 90,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            //! Custom Text Button
-            CustomTextButton(
-              buttonName: 'Skip',
-              onPressed: () {},
-              buttonTextStyle: AppTextStyles.montserrat15w400,
-            ),
-            CustomDotsIndicator(
-              dotsStream:
-                  OnBoardingController.onBoardingController.dotsOutputData,
-              onTapDots:
-                  (position) => OnBoardingController.onBoardingController
-                      .onTapDotsIndicator(position),
-            ),
-            CustomTextButton(
-              buttonName: 'Next',
-              onPressed:
-                  OnBoardingController.onBoardingController.onTapNextButton,
-            ),
-          ],
-        ),
+      //!Custom Bottom NavBar
+      bottomNavigationBar: CustomBottomNavBar(
+        dotsCount: 3,
+        nextStreamOutputData: OnBoardingController.onBoardingController.nextBtnOutputData,
+        onTapDots: (position) => OnBoardingController.onBoardingController.onTapDotsIndicator(position) ,
+        onTapNext: OnBoardingController.onBoardingController.onTapNextButton,
+        onTapSkip: (){},
       ),
       body: PageView.builder(
         controller: OnBoardingController.onBoardingController.pageController,

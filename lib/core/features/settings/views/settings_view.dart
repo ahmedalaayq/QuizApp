@@ -5,6 +5,7 @@ import 'package:quiz_app/core/features/settings/controller/settings_controller.d
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
 import 'package:quiz_app/core/theme/theme_controller.dart';
+import 'package:quiz_app/core/widgets/custom_radio_tile.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -13,9 +14,13 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(SettingsController());
     final themeController = Get.find<ThemeController>();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor:
+          isDarkMode
+              ? Theme.of(context).scaffoldBackgroundColor
+              : AppColors.backgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.primaryColor,
         elevation: 2,
@@ -27,7 +32,7 @@ class SettingsView extends StatelessWidget {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.whiteColor),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
           onPressed: () => Get.back(),
         ),
       ),
@@ -39,13 +44,27 @@ class SettingsView extends StatelessWidget {
             _buildSectionTitle('المظهر'),
             _buildSettingCard(
               icon: Icons.dark_mode,
-              title: 'الوضع الليلي',
-              subtitle: 'تفعيل الوضع الداكن',
+              title: 'المظهر',
+              subtitle: 'تغيير مظهر التطبيق',
               trailing: Obx(
-                () => Switch(
-                  value: themeController.isDarkMode.value,
-                  onChanged: (value) => themeController.toggleTheme(),
-                  activeThumbColor: AppColors.primaryColor,
+                () => Container(
+                  decoration: BoxDecoration(
+                    color:
+                        isDarkMode
+                            ? const Color(0xFF21262D)
+                            : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Switch(
+                    value: themeController.isCurrentlyDark,
+                    onChanged: (value) => themeController.setTheme(value),
+                    activeThumbColor: AppColors.primaryColor,
+                    activeTrackColor: AppColors.primaryColor.withValues(
+                      alpha: 0.3,
+                    ),
+                    inactiveThumbColor: Colors.grey,
+                    inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
+                  ),
                 ),
               ),
             ),
@@ -147,48 +166,65 @@ class SettingsView extends StatelessWidget {
     VoidCallback? onTap,
     bool isDestructive = false,
   }) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListTile(
-        onTap: onTap,
-        leading: Container(
-          padding: EdgeInsets.all(8.w),
+    return Builder(
+      builder: (context) {
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+        return Container(
+          margin: EdgeInsets.only(bottom: 8.h),
           decoration: BoxDecoration(
-            color: (isDestructive ? Colors.red : AppColors.primaryColor)
-                .withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8.r),
+            color: isDarkMode ? Theme.of(context).cardColor : Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: Icon(
-            icon,
-            color: isDestructive ? Colors.red : AppColors.primaryColor,
-            size: 24.r,
+          child: ListTile(
+            onTap: onTap,
+            leading: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: (isDestructive ? Colors.red : AppColors.primaryColor)
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Icon(
+                icon,
+                color: isDestructive ? Colors.red : AppColors.primaryColor,
+                size: 24.r,
+              ),
+            ),
+            title: Text(
+              title,
+              style: AppTextStyles.cairo14w600.copyWith(
+                color:
+                    isDestructive
+                        ? Colors.red
+                        : (isDarkMode ? Colors.white : null),
+              ),
+            ),
+            subtitle: Text(
+              subtitle,
+              style: AppTextStyles.cairo12w400.copyWith(
+                color: isDarkMode ? Colors.white70 : Colors.grey[600],
+              ),
+            ),
+            trailing:
+                trailing ??
+                (onTap != null
+                    ? Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16.r,
+                      color: isDarkMode ? Colors.white70 : null,
+                    )
+                    : null),
           ),
-        ),
-        title: Text(
-          title,
-          style: AppTextStyles.cairo14w600.copyWith(
-            color: isDestructive ? Colors.red : null,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: AppTextStyles.cairo12w400.copyWith(color: Colors.grey[600]),
-        ),
-        trailing:
-            trailing ??
-            (onTap != null ? Icon(Icons.arrow_forward_ios, size: 16.r) : null),
-      ),
+        );
+      },
     );
   }
 
@@ -203,16 +239,20 @@ class SettingsView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children:
               [3, 7, 14, 30].map((days) {
-                return RadioListTile<int>(
-                  title: Text('كل $days أيام'),
-                  value: days,
-                  groupValue: controller.reminderFrequency.value,
-                  onChanged: (value) {
-                    if (value != null) {
-                      controller.setReminderFrequency(value);
-                      Get.back();
-                    }
-                  },
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 8.h),
+                  child: CustomRadioTile<int>(
+                    title: 'كل $days أيام',
+                    value: days,
+                    groupValue: controller.reminderFrequency.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        controller.setReminderFrequency(value);
+                        Get.back();
+                      }
+                    },
+                    activeColor: AppColors.primaryColor,
+                  ),
                 );
               }).toList(),
         ),

@@ -8,13 +8,14 @@ class NotificationService {
 
   static bool _initialized = false;
 
-
   static Future<void> init() async {
     if (_initialized) return;
 
     tz.initializeTimeZones();
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -34,18 +35,19 @@ class NotificationService {
     _initialized = true;
   }
 
-
-  static void _onNotificationTapped(NotificationResponse response) {
-  
-  }
-
+  static void _onNotificationTapped(NotificationResponse response) {}
 
   static Future<bool> requestPermissions() async {
     final androidPlugin =
-        _notifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-    final iosPlugin = _notifications.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+        _notifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+    final iosPlugin =
+        _notifications
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >();
 
     bool? androidGranted;
     bool? iosGranted;
@@ -64,7 +66,6 @@ class NotificationService {
 
     return androidGranted ?? iosGranted ?? false;
   }
-
 
   static Future<void> showNotification({
     required int id,
@@ -94,7 +95,6 @@ class NotificationService {
 
     await _notifications.show(id, title, body, details, payload: payload);
   }
-
 
   static Future<void> scheduleNotification({
     required int id,
@@ -136,17 +136,14 @@ class NotificationService {
     );
   }
 
-
   static Future<void> schedulePeriodicReminder({
     required int id,
     required String title,
     required String body,
     required int days,
   }) async {
-  
     await cancelNotification(id);
 
-  
     final nextDate = DateTime.now().add(Duration(days: days));
     await scheduleNotification(
       id: id,
@@ -156,30 +153,26 @@ class NotificationService {
     );
   }
 
-
   static Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
   }
-
 
   static Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
   }
 
-
   static Future<List<PendingNotificationRequest>>
-      getPendingNotifications() async {
+  getPendingNotifications() async {
     return await _notifications.pendingNotificationRequests();
   }
 
-
   static Future<void> scheduleMotivationalNotifications() async {
     final messages = [
-      'حان وقت الاهتمام بصحتك النفسية! 💚',
-      'تذكر: صحتك النفسية أولوية 🌟',
-      'خذ دقائق لتقييم حالتك النفسية اليوم 🧠',
-      'الاهتمام بنفسك ليس رفاهية، بل ضرورة 💪',
-      'كيف حالك اليوم؟ دعنا نتحقق معاً 😊',
+      'حان وقت الاهتمام بصحتك النفسية!',
+      'تذكر: صحتك النفسية أولوية',
+      'خذ دقائق لتقييم حالتك النفسية اليوم',
+      'الاهتمام بنفسك ليس رفاهية، بل ضرورة',
+      'كيف حالك اليوم؟ دعنا نتحقق معاً',
     ];
 
     for (int i = 0; i < messages.length; i++) {
@@ -193,7 +186,6 @@ class NotificationService {
     }
   }
 
-
   static Future<void> showCompletionNotification(String assessmentTitle) async {
     await showNotification(
       id: 1,
@@ -202,14 +194,13 @@ class NotificationService {
     );
   }
 
-
   static Future<void> showAchievementNotification(
     String achievementTitle,
     String achievementIcon,
   ) async {
     await showNotification(
       id: 2,
-      title: '🎉 إنجاز جديد!',
+      title: 'إنجاز جديد!',
       body: '$achievementIcon $achievementTitle',
     );
   }

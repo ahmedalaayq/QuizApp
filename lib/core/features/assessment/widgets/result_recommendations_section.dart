@@ -7,10 +7,7 @@ import 'package:quiz_app/core/styles/app_text_styles.dart';
 class ResultRecommendationsSection extends StatelessWidget {
   final AssessmentResult result;
 
-  const ResultRecommendationsSection({
-    super.key,
-    required this.result,
-  });
+  const ResultRecommendationsSection({super.key, required this.result});
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +25,12 @@ class ResultRecommendationsSection extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.only(bottom: 12.h),
             child: Container(
+              alignment: Alignment.center,
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(
-                  color: AppColors.primaryLight,
-                  width: 1.5,
-                ),
+                border: Border.all(color: AppColors.primaryLight, width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -45,7 +40,7 @@ class ResultRecommendationsSection extends StatelessWidget {
                 ],
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     width: 32.r,
@@ -53,10 +48,7 @@ class ResultRecommendationsSection extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryColor,
-                          AppColors.primaryDark,
-                        ],
+                        colors: [AppColors.primaryColor, AppColors.primaryDark],
                       ),
                     ),
                     child: Center(
@@ -87,4 +79,3 @@ class ResultRecommendationsSection extends StatelessWidget {
     );
   }
 }
-

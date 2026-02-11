@@ -28,17 +28,11 @@ class AssessmentCard extends StatelessWidget {
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                color.withOpacity(0.15),
-                color.withOpacity(0.05),
-              ],
+              colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
             ),
-            border: Border.all(
-              color: color.withOpacity(0.3),
-              width: 1.5,
-            ),
+            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
@@ -59,10 +53,7 @@ class AssessmentCard extends StatelessWidget {
                       color: color.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: Text(
-                      icon,
-                      style: TextStyle(fontSize: 32.sp),
-                    ),
+                    child: Icon(icon),
                   ),
                   SizedBox(width: 16.w),
                   Expanded(
@@ -78,11 +69,7 @@ class AssessmentCard extends StatelessWidget {
                         SizedBox(height: 6.h),
                         Row(
                           children: [
-                            Icon(
-                              Icons.quiz_outlined,
-                              color: color,
-                              size: 16.r,
-                            ),
+                            Icon(Icons.quiz_outlined, color: color, size: 16.r),
                             SizedBox(width: 6.w),
                             Text(
                               '${assessment.questions.length} سؤال',
@@ -126,17 +113,9 @@ class AssessmentCard extends StatelessWidget {
     );
   }
 
-  String _getAssessmentIcon(String type) {
-    switch (type.toUpperCase()) {
-      case 'DASS':
-        return '😔';
-      case 'AUTISM':
-        return '🧠';
-      case 'ADHD':
-        return '⚡';
-      default:
-        return '📋';
-    }
+  IconData _getAssessmentIcon(String type) {
+    // Return empty string since we'll use IconData instead
+    return Icons.psychology;
   }
 
   Color _getAssessmentColor(String type) {

@@ -48,6 +48,7 @@ class AssessmentsListView extends StatelessWidget {
               return Padding(
                 padding: EdgeInsets.only(bottom: 16.h),
                 child: AssessmentCard(
+                  
                   assessment: assessment,
                   onTap: () => _startAssessment(assessment),
                 ),

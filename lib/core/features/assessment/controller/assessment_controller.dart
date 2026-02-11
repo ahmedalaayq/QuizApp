@@ -1,9 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/core/database/hive_service.dart';
 import 'package:quiz_app/core/database/models/assessment_history_model.dart';
 import 'package:quiz_app/core/features/achievements/services/achievement_service.dart';
 import 'package:quiz_app/core/models/assessment_model.dart';
 import 'package:quiz_app/core/services/assessment_analysis_service.dart';
+import 'package:quiz_app/core/services/auth_service.dart';
+import 'package:quiz_app/core/services/connectivity_service.dart';
+import 'package:quiz_app/core/services/firebase_service.dart';
+import 'package:quiz_app/core/services/logger_service.dart';
 import 'package:uuid/uuid.dart';
 
 class AssessmentController extends GetxController {
@@ -11,6 +16,7 @@ class AssessmentController extends GetxController {
   var responses = <UserResponse>[].obs;
   var isLoading = false.obs;
   var isStarted = false.obs;
+  var selectedAnswerId = ''.obs;
   var startTime = DateTime.now();
 
   late Assessment currentAssessment;
@@ -21,6 +27,7 @@ class AssessmentController extends GetxController {
     currentQuestionIndex.value = 0;
     responses.clear();
     isStarted.value = false;
+    selectedAnswerId.value = '';
     startTime = DateTime.now();
   }
 
@@ -30,21 +37,27 @@ class AssessmentController extends GetxController {
   }
 
   void selectAnswer(Answer answer, Question question) {
-    final response = UserResponse(
-      questionId: question.id,
-      answerId: answer.id,
-      answerText: answer.text,
-      score: answer.score,
-      category: question.category,
-    );
+    selectedAnswerId.value = answer.id;
 
-    responses.add(response);
+    // Add a small delay to show selection feedback
+    Future.delayed(const Duration(milliseconds: 500), () {
+      final response = UserResponse(
+        questionId: question.id,
+        answerId: answer.id,
+        answerText: answer.text,
+        score: answer.score,
+        category: question.category,
+      );
 
-    if (currentQuestionIndex.value < currentAssessment.questions.length - 1) {
-      currentQuestionIndex.value++;
-    } else {
-      submitAssessment();
-    }
+      responses.add(response);
+      selectedAnswerId.value = '';
+
+      if (currentQuestionIndex.value < currentAssessment.questions.length - 1) {
+        currentQuestionIndex.value++;
+      } else {
+        submitAssessment();
+      }
+    });
   }
 
   void submitAssessment() async {
@@ -79,6 +92,8 @@ class AssessmentController extends GetxController {
 
   Future<void> _saveResult(AssessmentResult result) async {
     final duration = DateTime.now().difference(startTime).inSeconds;
+    final authService = Get.find<AuthService>();
+    final connectivityService = Get.find<ConnectivityService>();
 
     final history = AssessmentHistory(
       id: const Uuid().v4(),
@@ -93,13 +108,73 @@ class AssessmentController extends GetxController {
       durationInSeconds: duration,
     );
 
-    await HiveService.saveAssessmentResult(history);
+    // Save locally first
+    try {
+      await HiveService.saveAssessmentResult(history);
+      LoggerService.info('Assessment result saved locally successfully');
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to save assessment result locally',
+        e,
+        stackTrace,
+      );
+    }
+
+    // Save to Firebase if connected and user is logged in
+    if (connectivityService.isConnected.value && authService.isLoggedIn.value) {
+      try {
+        LoggerService.info('Attempting to save assessment result to Firebase');
+
+        final firestoreData = {
+          'id': history.id,
+          'userId': authService.currentUserId,
+          'assessmentType': history.assessmentType,
+          'assessmentTitle': history.assessmentTitle,
+          'completionDate': history.completionDate.toIso8601String(),
+          'totalScore': history.totalScore,
+          'categoryScores': Map<String, dynamic>.from(history.categoryScores),
+          'overallSeverity': history.overallSeverity,
+          'interpretation': history.interpretation,
+          'recommendations': List<String>.from(history.recommendations),
+          'durationInSeconds': history.durationInSeconds,
+        };
+
+        LoggerService.info(
+          'Firestore data prepared: ${firestoreData.keys.join(', ')}',
+        );
+
+        await FirebaseService.saveAssessmentResult(firestoreData);
+        LoggerService.info('Assessment result saved to Firebase successfully');
+      } catch (e, stackTrace) {
+        LoggerService.error(
+          'Failed to save assessment result to Firebase',
+          e,
+          stackTrace,
+        );
+
+        // Show user-friendly error message
+        Get.snackbar(
+          'تنبيه',
+          'تم حفظ النتيجة محلياً، لكن فشل في الحفظ السحابي. تحقق من الاتصال.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor:
+              Get.isDarkMode ? const Color(0xFF21262D) : Colors.orange,
+          colorText: Get.isDarkMode ? const Color(0xFFF0F6FC) : Colors.white,
+          duration: const Duration(seconds: 4),
+        );
+      }
+    } else {
+      LoggerService.warning(
+        'Skipping Firebase save - not connected or not logged in',
+      );
+    }
   }
 
   void goBack() {
     if (currentQuestionIndex.value > 0) {
       currentQuestionIndex.value--;
       responses.removeAt(responses.length - 1);
+      selectedAnswerId.value = '';
     }
   }
 

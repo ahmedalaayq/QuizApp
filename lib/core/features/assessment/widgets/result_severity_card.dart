@@ -7,10 +7,7 @@ import 'package:quiz_app/core/styles/app_text_styles.dart';
 class ResultSeverityCard extends StatelessWidget {
   final AssessmentResult result;
 
-  const ResultSeverityCard({
-    super.key,
-    required this.result,
-  });
+  const ResultSeverityCard({super.key, required this.result});
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +15,11 @@ class ResultSeverityCard extends StatelessWidget {
     final severityIcon = _getSeverityIcon(result.overallSeverity);
 
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
-        border: Border.all(
-          color: severityColor.withOpacity(0.28),
-          width: 1.5,
-        ),
+        border: Border.all(color: severityColor.withOpacity(0.28), width: 1.5),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -51,16 +46,14 @@ class ResultSeverityCard extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             'الحالة الإجمالية',
-            style: AppTextStyles.cairo12w500.copyWith(
+            style: AppTextStyles.cairo13w600.copyWith(
               color: AppColors.greyDarkColor,
             ),
           ),
           SizedBox(height: 8.h),
           Text(
             result.overallSeverity,
-            style: AppTextStyles.cairo28w700.copyWith(
-              color: severityColor,
-            ),
+            style: AppTextStyles.cairo28w700.copyWith(color: severityColor),
           ),
           SizedBox(height: 12.h),
           Text(
@@ -97,19 +90,18 @@ class ResultSeverityCard extends StatelessWidget {
     switch (severity.toLowerCase()) {
       case 'طبيعي':
       case 'منخفض':
-        return '✅';
+        return 'check';
       case 'خفيف':
-        return '⚠️';
+        return 'warning';
       case 'معتدل':
-        return '⚠️';
+        return 'warning';
       case 'شديد':
-        return '⛔';
+        return 'error';
       case 'شديد جداً':
       case 'عالي جداً':
-        return '🚨';
+        return 'alert';
       default:
-        return '❓';
+        return 'question';
     }
   }
 }
-

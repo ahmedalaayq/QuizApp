@@ -8,13 +8,12 @@ import 'package:quiz_app/core/widgets/custom_button.dart';
 class AssessmentIntroScreen extends StatelessWidget {
   final AssessmentController controller;
 
-  const AssessmentIntroScreen({
-    super.key,
-    required this.controller,
-  });
+  const AssessmentIntroScreen({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
       child: Column(
@@ -28,15 +27,12 @@ class AssessmentIntroScreen extends StatelessWidget {
                 height: 120.r,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryColor,
-                      AppColors.primaryDark,
-                    ],
+                    colors: [AppColors.primaryColor, AppColors.primaryDark],
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryColor.withOpacity(0.2),
+                      color: AppColors.primaryColor.withValues(alpha: 0.2),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),
@@ -53,7 +49,7 @@ class AssessmentIntroScreen extends StatelessWidget {
                 controller.currentAssessment.title,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.cairo24w700.copyWith(
-                  color: AppColors.primaryDark,
+                  color: isDarkMode ? Colors.white : AppColors.primaryDark,
                 ),
               ),
               SizedBox(height: 20.h),
@@ -61,7 +57,7 @@ class AssessmentIntroScreen extends StatelessWidget {
                 controller.currentAssessment.description,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.cairo14w400.copyWith(
-                  color: AppColors.greyDarkColor,
+                  color: isDarkMode ? Colors.white70 : AppColors.greyDarkColor,
                   height: 1.6,
                 ),
               ),
@@ -69,9 +65,12 @@ class AssessmentIntroScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: AppColors.warningColor.withOpacity(0.08),
+                  color:
+                      isDarkMode
+                          ? AppColors.warningColor.withValues(alpha: 0.15)
+                          : AppColors.warningColor.withValues(alpha: 0.08),
                   border: Border.all(
-                    color: AppColors.warningColor.withOpacity(0.3),
+                    color: AppColors.warningColor.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                   borderRadius: BorderRadius.circular(14.r),
@@ -99,7 +98,8 @@ class AssessmentIntroScreen extends StatelessWidget {
                     Text(
                       'هذا الاختبار لأغراض تقييم نفسي فقط. النتائج لا تُعد تشخيصاً طبياً رسمياً.\n\nيُفضّل استشارة مختص نفسي أو طبيب للحصول على تقييم شامل ودقيق.',
                       style: AppTextStyles.cairo12w400.copyWith(
-                        color: AppColors.primaryDark,
+                        color:
+                            isDarkMode ? Colors.white : AppColors.primaryDark,
                         height: 1.7,
                       ),
                     ),
@@ -121,4 +121,3 @@ class AssessmentIntroScreen extends StatelessWidget {
     );
   }
 }
-

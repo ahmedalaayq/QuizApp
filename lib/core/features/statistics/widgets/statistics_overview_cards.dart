@@ -11,6 +11,7 @@ class StatisticsOverviewCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StatisticsController>();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Obx(
       () => GridView.count(
@@ -26,12 +27,14 @@ class StatisticsOverviewCards extends StatelessWidget {
             '${controller.totalAssessments.value}',
             Icons.assignment,
             AppColors.primaryColor,
+            isDarkMode,
           ),
           _buildStatCard(
             'متوسط النتائج',
             controller.averageScore.value.toStringAsFixed(1),
             Icons.trending_up,
             Colors.green,
+            isDarkMode,
           ),
           _buildStatCard(
             'آخر اختبار',
@@ -40,6 +43,7 @@ class StatisticsOverviewCards extends StatelessWidget {
                 : '-',
             Icons.calendar_today,
             Colors.orange,
+            isDarkMode,
           ),
           _buildStatCard(
             'الحالة الشائعة',
@@ -48,6 +52,7 @@ class StatisticsOverviewCards extends StatelessWidget {
                 : '-',
             Icons.info_outline,
             Colors.blue,
+            isDarkMode,
           ),
         ],
       ),
@@ -59,16 +64,34 @@ class StatisticsOverviewCards extends StatelessWidget {
     String value,
     IconData icon,
     Color color,
+    bool isDarkMode,
   ) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          colors:
+              isDarkMode
+                  ? [const Color(0xFF2D3748), const Color(0xFF1A202C)]
+                  : [Colors.white, Colors.grey.shade50],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color:
+              isDarkMode
+                  ? const Color(0xFF4A5568)
+                  : Colors.grey.withValues(alpha: 0.2),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
+            color:
+                isDarkMode
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -80,7 +103,12 @@ class StatisticsOverviewCards extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              gradient: LinearGradient(
+                colors: [
+                  color.withValues(alpha: 0.2),
+                  color.withValues(alpha: 0.1),
+                ],
+              ),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(icon, color: color, size: 24.r),
@@ -91,13 +119,16 @@ class StatisticsOverviewCards extends StatelessWidget {
               Text(
                 title,
                 style: AppTextStyles.cairo12w400.copyWith(
-                  color: Colors.grey[600],
+                  color:
+                      isDarkMode ? const Color(0xFFA0AEC0) : Colors.grey[600],
                 ),
               ),
               SizedBox(height: 4.h),
               Text(
                 value,
-                style: AppTextStyles.cairo18w700.copyWith(color: color),
+                style: AppTextStyles.cairo18w700.copyWith(
+                  color: isDarkMode ? const Color(0xFFF7FAFC) : color,
+                ),
               ),
             ],
           ),

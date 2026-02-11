@@ -28,6 +28,9 @@ class UserSettings extends HiveObject {
   @HiveField(7)
   final DateTime? lastAssessmentDate;
 
+  @HiveField(8)
+  final String themeMode;
+
   UserSettings({
     this.isDarkMode = false,
     this.language = 'ar',
@@ -37,6 +40,7 @@ class UserSettings extends HiveObject {
     this.reminderFrequency = 7,
     this.biometricEnabled = false,
     this.lastAssessmentDate,
+    this.themeMode = 'system',
   });
 
   UserSettings copyWith({
@@ -48,6 +52,7 @@ class UserSettings extends HiveObject {
     int? reminderFrequency,
     bool? biometricEnabled,
     DateTime? lastAssessmentDate,
+    String? themeMode,
   }) {
     return UserSettings(
       isDarkMode: isDarkMode ?? this.isDarkMode,
@@ -58,6 +63,7 @@ class UserSettings extends HiveObject {
       reminderFrequency: reminderFrequency ?? this.reminderFrequency,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
       lastAssessmentDate: lastAssessmentDate ?? this.lastAssessmentDate,
+      themeMode: themeMode ?? this.themeMode,
     );
   }
 
@@ -74,6 +80,7 @@ class UserSettings extends HiveObject {
           json['lastAssessmentDate'] != null
               ? DateTime.parse(json['lastAssessmentDate'] as String)
               : null,
+      themeMode: json['themeMode'] as String? ?? 'system',
     );
   }
 
@@ -87,6 +94,7 @@ class UserSettings extends HiveObject {
       'reminderFrequency': reminderFrequency,
       'biometricEnabled': biometricEnabled,
       'lastAssessmentDate': lastAssessmentDate?.toIso8601String(),
+      'themeMode': themeMode,
     };
   }
 }

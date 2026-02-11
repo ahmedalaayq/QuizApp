@@ -83,8 +83,8 @@ class AchievementService {
 
   static void showAchievementNotification(Achievement achievement) {
     Get.snackbar(
-      '🎉 إنجاز جديد!',
-      '${achievement.icon} ${achievement.title}\n${achievement.description}',
+      'إنجاز جديد!',
+      '${achievement.title}\n${achievement.description}',
       snackPosition: SnackPosition.TOP,
       duration: const Duration(seconds: 4),
     );

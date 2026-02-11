@@ -7,7 +7,7 @@ class HomeAssessmentCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String description;
-  final String icon;
+  final IconData icon;
   final Color color;
   final String questions;
   final VoidCallback onTap;
@@ -51,16 +51,11 @@ class HomeAssessmentCard extends StatelessWidget {
                 height: 70.r,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      color.withOpacity(0.22),
-                      color.withOpacity(0.10),
-                    ],
+                    colors: [color.withOpacity(0.22), color.withOpacity(0.10)],
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: Center(
-                  child: Text(icon, style: TextStyle(fontSize: 36.r)),
-                ),
+                child: Center(child: Icon(icon, size: 36.r, color: color)),
               ),
               SizedBox(width: 16.w),
               Expanded(
@@ -102,8 +97,9 @@ class HomeAssessmentCard extends StatelessWidget {
                           ),
                           child: Text(
                             questions,
-                            style:
-                                AppTextStyles.cairo11w600.copyWith(color: color),
+                            style: AppTextStyles.cairo11w600.copyWith(
+                              color: color,
+                            ),
                           ),
                         ),
                         SizedBox(width: 8.w),
@@ -141,4 +137,3 @@ class HomeAssessmentCard extends StatelessWidget {
     );
   }
 }
-

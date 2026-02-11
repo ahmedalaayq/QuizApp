@@ -3,6 +3,7 @@ import 'package:quiz_app/core/models/assessment_model.dart';
 class AssessmentsData {
   static Assessment getDASS21Assessment() {
     return Assessment(
+      
       id: 'dass21',
       title: 'مقياس الاكتئاب والقلق والإجهاد (DASS-21)',
       description: 'يقيس درجات الاكتئاب والقلق والإجهاد لديك',

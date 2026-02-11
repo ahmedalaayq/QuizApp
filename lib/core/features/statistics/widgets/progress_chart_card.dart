@@ -12,21 +12,39 @@ class ProgressChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<StatisticsController>();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Obx(() {
       if (controller.assessments.isEmpty) {
         return const SizedBox.shrink();
       }
 
-      return Container(
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          gradient: LinearGradient(
+            colors:
+                isDarkMode
+                    ? [const Color(0xFF2D3748), const Color(0xFF1A202C)]
+                    : [Colors.white, Colors.grey.shade50],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color:
+                isDarkMode
+                    ? const Color(0xFF4A5568)
+                    : Colors.grey.withValues(alpha: 0.2),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
+              color:
+                  isDarkMode
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -34,11 +52,21 @@ class ProgressChartCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('تطور النتائج', style: AppTextStyles.cairo18w700),
+            Text(
+              'تطور النتائج',
+              style: AppTextStyles.cairo18w700.copyWith(
+                color:
+                    isDarkMode
+                        ? const Color(0xFFF7FAFC)
+                        : AppColors.primaryDark,
+              ),
+            ),
             SizedBox(height: 20.h),
             SizedBox(
               height: 200.h,
-              child: LineChart(_buildChartData(controller.assessments)),
+              child: LineChart(
+                _buildChartData(controller.assessments, isDarkMode),
+              ),
             ),
           ],
         ),
@@ -46,7 +74,7 @@ class ProgressChartCard extends StatelessWidget {
     });
   }
 
-  LineChartData _buildChartData(List assessments) {
+  LineChartData _buildChartData(List assessments, bool isDarkMode) {
     final spots = <FlSpot>[];
 
     for (int i = 0; i < assessments.length && i < 10; i++) {
@@ -59,7 +87,10 @@ class ProgressChartCard extends StatelessWidget {
         drawVerticalLine: false,
         horizontalInterval: 10,
         getDrawingHorizontalLine: (value) {
-          return FlLine(color: Colors.grey[300], strokeWidth: 1);
+          return FlLine(
+            color: isDarkMode ? const Color(0xFF4A5568) : Colors.grey[300]!,
+            strokeWidth: 1,
+          );
         },
       ),
       titlesData: FlTitlesData(
@@ -77,7 +108,8 @@ class ProgressChartCard extends StatelessWidget {
               return Text(
                 '${value.toInt() + 1}',
                 style: AppTextStyles.cairo11w400.copyWith(
-                  color: Colors.grey[600],
+                  color:
+                      isDarkMode ? const Color(0xFFA0AEC0) : Colors.grey[600],
                 ),
               );
             },
@@ -92,7 +124,8 @@ class ProgressChartCard extends StatelessWidget {
               return Text(
                 value.toInt().toString(),
                 style: AppTextStyles.cairo11w400.copyWith(
-                  color: Colors.grey[600],
+                  color:
+                      isDarkMode ? const Color(0xFFA0AEC0) : Colors.grey[600],
                 ),
               );
             },
@@ -101,7 +134,9 @@ class ProgressChartCard extends StatelessWidget {
       ),
       borderData: FlBorderData(
         show: true,
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(
+          color: isDarkMode ? const Color(0xFF4A5568) : Colors.grey[300]!,
+        ),
       ),
       minX: 0,
       maxX: (spots.length - 1).toDouble(),
@@ -121,13 +156,14 @@ class ProgressChartCard extends StatelessWidget {
                 radius: 4,
                 color: AppColors.primaryColor,
                 strokeWidth: 2,
-                strokeColor: Colors.white,
+                strokeColor:
+                    isDarkMode ? const Color(0xFF2D3748) : Colors.white,
               );
             },
           ),
           belowBarData: BarAreaData(
             show: true,
-            color: AppColors.primaryColor.withOpacity(0.1),
+            color: AppColors.primaryColor.withValues(alpha: 0.1),
           ),
         ),
       ],

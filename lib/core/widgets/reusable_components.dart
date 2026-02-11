@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
+import 'package:quiz_app/core/theme/app_theme.dart';
 
 /// Reusable Card Component
 class CustomCard extends StatelessWidget {
@@ -36,7 +37,7 @@ class CustomCard extends StatelessWidget {
           border: border,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: elevation ?? 4,
               offset: const Offset(0, 2),
             ),
@@ -51,7 +52,7 @@ class CustomCard extends StatelessWidget {
 /// Reusable Button Component
 class CustomElevatedButton extends StatelessWidget {
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color? backgroundColor;
   final Color? textColor;
   final double? borderRadius;
@@ -112,7 +113,9 @@ class CustomElevatedButton extends StatelessWidget {
       ),
     );
 
-    return isFullWidth ? SizedBox.expand(child: button) : button;
+    return isFullWidth
+        ? SizedBox(width: double.infinity, child: button)
+        : button;
   }
 }
 
@@ -157,6 +160,10 @@ class CustomTextField extends StatelessWidget {
         Text(label, style: AppTextStyles.cairo12w600),
         SizedBox(height: 8.h),
         TextFormField(
+          onTapOutside: (event) => FocusScope.of(context).unfocus(),
+          style: AppTextStyles.cairo14w500.copyWith(
+            color: AppTheme.darkTheme == true ? Colors.white : Colors.black,
+          ),
           controller: controller,
           maxLines: obscureText ? 1 : maxLines,
           minLines: minLines,
@@ -280,7 +287,7 @@ class ScoreCard extends StatelessWidget {
     final scoreColor = _getColorByScore(percentage);
 
     return CustomCard(
-      backgroundColor: cardColor ?? scoreColor.withOpacity(0.1),
+      backgroundColor: cardColor ?? scoreColor.withValues(alpha: 0.1),
       border: Border.all(color: scoreColor, width: 1.5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

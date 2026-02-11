@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/core/database/hive_service.dart';
 import 'package:quiz_app/core/database/models/assessment_history_model.dart';
 import 'package:quiz_app/core/services/pdf_service.dart';
+import 'package:quiz_app/core/styles/app_colors.dart';
 
 class StatisticsController extends GetxController {
   final RxList<AssessmentHistory> assessments = <AssessmentHistory>[].obs;
@@ -32,14 +34,12 @@ class StatisticsController extends GetxController {
 
     totalAssessments.value = assessments.length;
 
-  
     final total = assessments.fold<int>(
       0,
       (sum, item) => sum + item.totalScore,
     );
     averageScore.value = total / assessments.length;
 
-  
     final severityMap = <String, int>{};
     for (var assessment in assessments) {
       severityMap[assessment.overallSeverity] =
@@ -59,23 +59,54 @@ class StatisticsController extends GetxController {
       return;
     }
 
-  
-    Get.dialog(
-      AlertDialog(
-        title: const Text('تصدير التقرير'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.whiteColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Wrap(
           children: [
+            // Title
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Center(
+                child: Text(
+                  'تصدير التقرير',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryDark,
+                  ),
+                ),
+              ),
+            ),
+            const Divider(),
+
+            // Export Full Report
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
+              leading: const Icon(
+                Icons.picture_as_pdf,
+                color: Colors.redAccent,
+              ),
               title: const Text('تصدير تقرير شامل'),
               onTap: () async {
                 Get.back();
                 await PdfService.exportFullReport(assessments);
               },
             ),
+
+            // Print Last Report
             ListTile(
-              leading: const Icon(Icons.print),
+              leading: const Icon(Icons.print, color: Colors.blueAccent),
               title: const Text('طباعة آخر تقرير'),
               onTap: () async {
                 Get.back();
@@ -84,9 +115,26 @@ class StatisticsController extends GetxController {
                 }
               },
             ),
+
+            const SizedBox(height: 8),
+
+            // Cancel Button
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                'إلغاء',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.redColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ],
         ),
       ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   }
 

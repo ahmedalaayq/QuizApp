@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/core/database/hive_service.dart';
 import 'package:quiz_app/core/database/models/assessment_history_model.dart';
+import 'package:quiz_app/core/services/pdf_service.dart';
 
 class StatisticsController extends GetxController {
   final RxList<AssessmentHistory> assessments = <AssessmentHistory>[].obs;
@@ -48,11 +50,43 @@ class StatisticsController extends GetxController {
   }
 
   Future<void> exportReport() async {
-    // سيتم تنفيذها لاحقاً
-    Get.snackbar(
-      'قريباً',
-      'ميزة تصدير التقرير قيد التطوير',
-      snackPosition: SnackPosition.BOTTOM,
+    if (assessments.isEmpty) {
+      Get.snackbar(
+        'تنبيه',
+        'لا توجد بيانات لتصديرها',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // عرض خيارات التصدير
+    Get.dialog(
+      AlertDialog(
+        title: const Text('تصدير التقرير'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf),
+              title: const Text('تصدير تقرير شامل'),
+              onTap: () async {
+                Get.back();
+                await PdfService.exportFullReport(assessments);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.print),
+              title: const Text('طباعة آخر تقرير'),
+              onTap: () async {
+                Get.back();
+                if (assessments.isNotEmpty) {
+                  await PdfService.printReport(assessments.first);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 

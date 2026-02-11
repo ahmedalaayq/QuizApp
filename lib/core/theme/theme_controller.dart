@@ -13,7 +13,7 @@ class ThemeController extends GetxController {
     _loadThemeFromStorage();
   }
 
-  // تحميل الثيم من التخزين
+
   void _loadThemeFromStorage() {
     final settings = HiveService.getSettings();
     if (settings != null) {
@@ -22,12 +22,12 @@ class ThemeController extends GetxController {
     }
   }
 
-  // تبديل الثيم
+
   Future<void> toggleTheme() async {
     isDarkMode.value = !isDarkMode.value;
     themeMode.value = isDarkMode.value ? ThemeMode.dark : ThemeMode.light;
 
-    // حفظ في التخزين
+  
     final currentSettings = HiveService.getSettings() ?? UserSettings();
     await HiveService.saveSettings(
       currentSettings.copyWith(isDarkMode: isDarkMode.value),
@@ -36,7 +36,7 @@ class ThemeController extends GetxController {
     Get.changeThemeMode(themeMode.value);
   }
 
-  // تعيين الثيم
+
   Future<void> setTheme(bool dark) async {
     isDarkMode.value = dark;
     themeMode.value = dark ? ThemeMode.dark : ThemeMode.light;

@@ -73,7 +73,7 @@ class BiometricService {
   static Future<void> stopAuthentication() async {
     try {
       await _auth.stopAuthentication();
-    // ignore: empty_catches
+  
     } catch (e) {
       
     }

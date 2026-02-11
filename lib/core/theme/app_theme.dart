@@ -4,7 +4,7 @@ import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
 
 class AppTheme {
-  // Light Theme
+
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -50,7 +50,7 @@ class AppTheme {
     ),
   );
 
-  // Dark Theme
+
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,

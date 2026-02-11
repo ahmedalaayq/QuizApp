@@ -19,13 +19,13 @@ class ResultActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // زر تصدير PDF
+      
         Center(
           child: CustomButton(
             backgroundColor: Colors.red,
             foregroundColor: AppColors.whiteColor,
             onPressed: () async {
-              // الحصول على آخر نتيجة محفوظة
+            
               final history = HiveService.getRecentResults(limit: 1);
               if (history.isNotEmpty) {
                 await PdfService.exportSingleReport(history.first);

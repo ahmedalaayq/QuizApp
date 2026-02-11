@@ -49,24 +49,24 @@ class FirebaseService {
     }
   }
 
-  // التحقق من وضع الصيانة
+
   static bool isMaintenanceMode() {
     return _remoteConfig?.getBool('maintenance_mode') ?? false;
   }
 
-  // الحصول على رسالة الصيانة
+
   static String getMaintenanceMessage() {
     return _remoteConfig?.getString('maintenance_message') ??
         'التطبيق قيد الصيانة حالياً';
   }
 
-  // التحقق من الحاجة للتحديث
+
   static bool needsUpdate(String currentVersion) {
     final minVersion = _remoteConfig?.getString('min_app_version') ?? '1.0.0';
     return _compareVersions(currentVersion, minVersion) < 0;
   }
 
-  // مقارنة الإصدارات
+
   static int _compareVersions(String v1, String v2) {
     final parts1 = v1.split('.').map(int.parse).toList();
     final parts2 = v2.split('.').map(int.parse).toList();
@@ -78,7 +78,7 @@ class FirebaseService {
     return 0;
   }
 
-  // الحصول على الأسئلة من Firestore
+
   static Future<List<Map<String, dynamic>>> getQuestionsFromFirebase(
     String assessmentType,
   ) async {
@@ -100,7 +100,7 @@ class FirebaseService {
     }
   }
 
-  // حفظ نتيجة في Firestore (اختياري)
+
   static Future<void> saveResultToFirebase(Map<String, dynamic> result) async {
     if (_firestore == null) return;
 
@@ -114,7 +114,7 @@ class FirebaseService {
     }
   }
 
-  // الحصول على الإحصائيات العامة
+
   static Future<Map<String, dynamic>> getGlobalStats() async {
     if (_firestore == null) return {};
 
@@ -127,7 +127,7 @@ class FirebaseService {
     }
   }
 
-  // إضافة سؤال جديد (للمسؤول)
+
   static Future<void> addQuestion({
     required String assessmentType,
     required Map<String, dynamic> questionData,
@@ -155,7 +155,7 @@ class FirebaseService {
     }
   }
 
-  // تحديث سؤال (للمسؤول)
+
   static Future<void> updateQuestion({
     required String assessmentType,
     required String questionId,
@@ -185,7 +185,7 @@ class FirebaseService {
     }
   }
 
-  // حذف سؤال (للمسؤول)
+
   static Future<void> deleteQuestion({
     required String assessmentType,
     required String questionId,
@@ -214,7 +214,7 @@ class FirebaseService {
     }
   }
 
-  // التحقق من حالة الدفع (للنسخة المدفوعة)
+
   static Future<bool> checkPaymentStatus(String userId) async {
     if (_firestore == null) return false;
 
@@ -232,7 +232,7 @@ class FirebaseService {
     }
   }
 
-  // تسجيل عملية دفع
+
   static Future<void> recordPayment({
     required String userId,
     required double amount,
@@ -254,7 +254,7 @@ class FirebaseService {
     }
   }
 
-  // تحديث Remote Config
+
   static Future<void> refreshRemoteConfig() async {
     if (_remoteConfig == null) return;
 

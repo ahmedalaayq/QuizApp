@@ -1,6 +1,5 @@
 import 'package:quiz_app/core/models/assessment_model.dart';
 
-/// مكتبة الاختبارات النفسية الموحدة
 class AssessmentsData {
   static Assessment getDASS21Assessment() {
     return Assessment(

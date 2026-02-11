@@ -3,14 +3,12 @@ import 'package:quiz_app/core/database/hive_service.dart';
 import 'package:quiz_app/core/features/achievements/models/achievement_model.dart';
 
 class AchievementService {
-  // التحقق من الإنجازات بعد إكمال اختبار
   static Future<List<Achievement>> checkAchievements() async {
     final unlockedAchievements = <Achievement>[];
     final allAchievements = Achievement.getAllAchievements();
     final assessments = HiveService.getAllResults();
 
     for (var achievement in allAchievements) {
-      // تخطي الإنجازات المفتوحة مسبقاً
       if (HiveService.isAchievementUnlocked(achievement.id)) {
         continue;
       }
@@ -48,7 +46,6 @@ class AchievementService {
     return unlockedAchievements;
   }
 
-  // التحقق من التحسن
   static bool _checkImprovement(List assessments) {
     if (assessments.length < 2) return false;
 
@@ -58,10 +55,9 @@ class AchievementService {
     final first = sorted.first.totalScore;
     final last = sorted.last.totalScore;
 
-    return last < first; // النتيجة الأقل تعني تحسن في الحالة النفسية
+    return last < first;
   }
 
-  // التحقق من الاستمرارية
   static bool _checkStreak(List assessments, int requiredDays) {
     if (assessments.length < requiredDays) return false;
 
@@ -85,7 +81,6 @@ class AchievementService {
     return false;
   }
 
-  // عرض إشعار الإنجاز
   static void showAchievementNotification(Achievement achievement) {
     Get.snackbar(
       '🎉 إنجاز جديد!',
@@ -95,7 +90,6 @@ class AchievementService {
     );
   }
 
-  // الحصول على نسبة الإنجازات
   static double getAchievementProgress() {
     final allAchievements = Achievement.getAllAchievements();
     final unlockedCount =
@@ -105,7 +99,6 @@ class AchievementService {
     return unlockedCount / allAchievements.length;
   }
 
-  // الحصول على عدد الإنجازات المفتوحة
   static int getUnlockedCount() {
     final allAchievements = Achievement.getAllAchievements();
     return allAchievements

@@ -10,12 +10,12 @@ import 'package:quiz_app/core/database/models/assessment_history_model.dart';
 import 'package:share_plus/share_plus.dart';
 
 class PdfService {
-  // تصدير تقرير واحد
+
   static Future<void> exportSingleReport(AssessmentHistory assessment) async {
     try {
       final pdf = pw.Document();
 
-      // تحميل الخط العربي
+    
       final arabicFont = await _loadArabicFont();
 
       pdf.addPage(
@@ -27,7 +27,7 @@ class PdfService {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                // العنوان
+              
                 pw.Container(
                   width: double.infinity,
                   padding: const pw.EdgeInsets.all(20),
@@ -59,7 +59,7 @@ class PdfService {
                 ),
                 pw.SizedBox(height: 30),
 
-                // معلومات التقرير
+              
                 _buildInfoSection(
                   'التاريخ',
                   _formatDate(assessment.completionDate),
@@ -78,7 +78,7 @@ class PdfService {
                 pw.Divider(thickness: 2),
                 pw.SizedBox(height: 20),
 
-                // التفسير
+              
                 pw.Text(
                   'التفسير:',
                   style: pw.TextStyle(
@@ -95,7 +95,7 @@ class PdfService {
 
                 pw.SizedBox(height: 20),
 
-                // التوصيات
+              
                 pw.Text(
                   'التوصيات:',
                   style: pw.TextStyle(
@@ -125,7 +125,7 @@ class PdfService {
 
                 pw.Spacer(),
 
-                // تنويه
+              
                 pw.Container(
                   padding: const pw.EdgeInsets.all(15),
                   decoration: pw.BoxDecoration(
@@ -145,7 +145,7 @@ class PdfService {
         ),
       );
 
-      // حفظ ومشاركة
+    
       await _savePdf(
         pdf,
         'تقرير_${assessment.assessmentType}_${DateTime.now().millisecondsSinceEpoch}',
@@ -159,7 +159,7 @@ class PdfService {
     }
   }
 
-  // تصدير تقرير شامل
+
   static Future<void> exportFullReport(
     List<AssessmentHistory> assessments,
   ) async {
@@ -167,7 +167,7 @@ class PdfService {
       final pdf = pw.Document();
       final arabicFont = await _loadArabicFont();
 
-      // صفحة الغلاف
+    
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4,
@@ -207,7 +207,7 @@ class PdfService {
         ),
       );
 
-      // صفحة الإحصائيات
+    
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4,
@@ -245,7 +245,7 @@ class PdfService {
         ),
       );
 
-      // صفحات الاختبارات
+    
       for (var assessment in assessments) {
         pdf.addPage(
           pw.Page(
@@ -303,7 +303,7 @@ class PdfService {
     }
   }
 
-  // طباعة التقرير
+
   static Future<void> printReport(AssessmentHistory assessment) async {
     try {
       final pdf = pw.Document();
@@ -348,14 +348,14 @@ class PdfService {
     }
   }
 
-  // Helper methods
+
   static Future<pw.Font> _loadArabicFont() async {
-    // يمكن استخدام خط Cairo من assets
+  
     try {
       final fontData = await rootBundle.load('assets/fonts/Cairo-Regular.ttf');
       return pw.Font.ttf(fontData);
     } catch (e) {
-      // fallback to default
+    
       return pw.Font.ttf(
         await rootBundle.load('assets/fonts/Cairo-Regular.ttf'),
       );
@@ -409,7 +409,7 @@ class PdfService {
       final file = File('${output.path}/$filename.pdf');
       await file.writeAsBytes(await pdf.save());
 
-      // مشاركة الملف
+    
       await Share.shareXFiles([XFile(file.path)], text: 'تقرير التقييم النفسي');
 
       Get.snackbar(

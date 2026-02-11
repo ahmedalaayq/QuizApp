@@ -25,7 +25,7 @@ class HomeView extends StatelessWidget {
             const HomeWelcomeCard(),
             SizedBox(height: 24.h),
 
-            // Quick Actions
+          
             _buildQuickActions(),
             SizedBox(height: 32.h),
 

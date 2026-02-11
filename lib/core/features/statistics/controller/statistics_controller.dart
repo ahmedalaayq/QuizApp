@@ -32,14 +32,14 @@ class StatisticsController extends GetxController {
 
     totalAssessments.value = assessments.length;
 
-    // حساب المتوسط
+  
     final total = assessments.fold<int>(
       0,
       (sum, item) => sum + item.totalScore,
     );
     averageScore.value = total / assessments.length;
 
-    // الشدة الأكثر شيوعاً
+  
     final severityMap = <String, int>{};
     for (var assessment in assessments) {
       severityMap[assessment.overallSeverity] =
@@ -59,7 +59,7 @@ class StatisticsController extends GetxController {
       return;
     }
 
-    // عرض خيارات التصدير
+  
     Get.dialog(
       AlertDialog(
         title: const Text('تصدير التقرير'),

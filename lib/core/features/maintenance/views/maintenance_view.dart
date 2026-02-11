@@ -35,7 +35,7 @@ class MaintenanceView extends StatelessWidget {
                 ),
                 SizedBox(height: 40.h),
 
-                // العنوان
+              
                 Text(
                   'التطبيق قيد الصيانة',
                   style: AppTextStyles.cairo24w700.copyWith(
@@ -55,7 +55,7 @@ class MaintenanceView extends StatelessWidget {
                 ),
                 SizedBox(height: 40.h),
 
-                // معلومات إضافية
+              
                 Container(
                   padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(

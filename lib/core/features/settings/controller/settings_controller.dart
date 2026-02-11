@@ -36,7 +36,7 @@ class SettingsController extends GetxController {
 
   Future<void> toggleNotifications(bool value) async {
     if (value) {
-      // طلب الأذونات
+    
       final granted = await NotificationService.requestPermissions();
       if (!granted) {
         Get.snackbar(
@@ -47,10 +47,10 @@ class SettingsController extends GetxController {
         return;
       }
 
-      // جدولة إشعارات تحفيزية
+    
       await NotificationService.scheduleMotivationalNotifications();
     } else {
-      // إلغاء جميع الإشعارات
+    
       await NotificationService.cancelAllNotifications();
     }
 
@@ -75,7 +75,7 @@ class SettingsController extends GetxController {
     }
 
     if (value) {
-      // طلب المصادقة لتفعيل الميزة
+    
       final authenticated = await BiometricService.authenticate(
         reason: 'قم بالمصادقة لتفعيل قفل التطبيق',
       );
@@ -95,7 +95,7 @@ class SettingsController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } else {
-      // طلب المصادقة لإيقاف الميزة
+    
       final authenticated = await BiometricService.authenticate(
         reason: 'قم بالمصادقة لإيقاف قفل التطبيق',
       );
@@ -124,7 +124,7 @@ class SettingsController extends GetxController {
     reminderFrequency.value = days;
     await _saveSettings();
 
-    // إعادة جدولة الإشعارات
+  
     if (notificationsEnabled.value) {
       await NotificationService.schedulePeriodicReminder(
         id: 10,
@@ -153,7 +153,7 @@ class SettingsController extends GetxController {
   }
 
   Future<void> backupData() async {
-    // يمكن إضافة منطق النسخ الاحتياطي هنا
+  
     Get.snackbar(
       'نسخ احتياطي',
       'تم حفظ البيانات بنجاح',
@@ -164,7 +164,7 @@ class SettingsController extends GetxController {
   Future<void> clearAllData() async {
     await HiveService.clearAllData();
 
-    // إعادة تعيين القيم
+  
     notificationsEnabled.value = true;
     biometricEnabled.value = false;
     reminderFrequency.value = 7;
@@ -176,7 +176,7 @@ class SettingsController extends GetxController {
     );
   }
 
-  // اختبار الإشعارات
+
   Future<void> testNotification() async {
     await NotificationService.showNotification(
       id: 999,

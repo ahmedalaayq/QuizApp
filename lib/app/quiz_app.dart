@@ -14,7 +14,7 @@ class QuizApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // التحقق من وضع الصيانة
+  
     final isMaintenanceMode = FirebaseService.isMaintenanceMode();
 
     if (isMaintenanceMode) {
@@ -26,7 +26,7 @@ class QuizApp extends StatelessWidget {
 
     return ScreenUtilInit(
       builder: (context, child) {
-        // تهيئة Controllers
+      
         Get.put(StudentController());
         final themeController = Get.put(ThemeController());
 

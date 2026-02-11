@@ -8,7 +8,7 @@ class NotificationService {
 
   static bool _initialized = false;
 
-  // تهيئة الإشعارات
+
   static Future<void> init() async {
     if (_initialized) return;
 
@@ -34,12 +34,12 @@ class NotificationService {
     _initialized = true;
   }
 
-  // معالجة النقر على الإشعار
+
   static void _onNotificationTapped(NotificationResponse response) {
-    // يمكن إضافة منطق التنقل هنا
+  
   }
 
-  // طلب الأذونات
+
   static Future<bool> requestPermissions() async {
     final androidPlugin =
         _notifications.resolvePlatformSpecificImplementation<
@@ -65,7 +65,7 @@ class NotificationService {
     return androidGranted ?? iosGranted ?? false;
   }
 
-  // إرسال إشعار فوري
+
   static Future<void> showNotification({
     required int id,
     required String title,
@@ -95,7 +95,7 @@ class NotificationService {
     await _notifications.show(id, title, body, details, payload: payload);
   }
 
-  // جدولة إشعار
+
   static Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -136,17 +136,17 @@ class NotificationService {
     );
   }
 
-  // جدولة إشعارات دورية
+
   static Future<void> schedulePeriodicReminder({
     required int id,
     required String title,
     required String body,
     required int days,
   }) async {
-    // إلغاء الإشعار القديم
+  
     await cancelNotification(id);
 
-    // جدولة إشعار جديد
+  
     final nextDate = DateTime.now().add(Duration(days: days));
     await scheduleNotification(
       id: id,
@@ -156,23 +156,23 @@ class NotificationService {
     );
   }
 
-  // إلغاء إشعار محدد
+
   static Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
   }
 
-  // إلغاء جميع الإشعارات
+
   static Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
   }
 
-  // الحصول على الإشعارات المجدولة
+
   static Future<List<PendingNotificationRequest>>
       getPendingNotifications() async {
     return await _notifications.pendingNotificationRequests();
   }
 
-  // إشعارات تحفيزية
+
   static Future<void> scheduleMotivationalNotifications() async {
     final messages = [
       'حان وقت الاهتمام بصحتك النفسية! 💚',
@@ -193,7 +193,7 @@ class NotificationService {
     }
   }
 
-  // إشعار بعد إكمال اختبار
+
   static Future<void> showCompletionNotification(String assessmentTitle) async {
     await showNotification(
       id: 1,
@@ -202,7 +202,7 @@ class NotificationService {
     );
   }
 
-  // إشعار بإنجاز جديد
+
   static Future<void> showAchievementNotification(
     String achievementTitle,
     String achievementIcon,

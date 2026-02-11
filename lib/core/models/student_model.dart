@@ -1,4 +1,3 @@
-/// نموذج بيانات الطالب وتقييمه
 class StudentProfile {
   final String id;
   final String name;
@@ -49,7 +48,6 @@ class StudentProfile {
   };
 }
 
-/// نموذج تقييم الطالب
 class StudentAssessment {
   final String id;
   final String assessmentId;
@@ -118,7 +116,6 @@ class StudentAssessment {
   };
 }
 
-/// نموذج تقرير الطالب الشامل
 class StudentReport {
   final StudentProfile profile;
   final List<StudentAssessment> recentAssessments;
@@ -140,7 +137,6 @@ class StudentReport {
   };
 }
 
-/// إحصائيات الطالب
 class Statistics {
   final double averageScore;
   final double averageAccuracy;

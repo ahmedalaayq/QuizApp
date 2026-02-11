@@ -3,8 +3,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
-import 'package:quiz_app/core/theme/app_theme.dart';
-import 'package:quiz_app/core/theme/theme_controller.dart';
 
 class HomeSectionTitle extends StatelessWidget {
   final String title;

@@ -266,7 +266,7 @@ class AdminNotificationsTab extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               DropdownButtonFormField<String>(
-                value: selectedRole,
+                initialValue: selectedRole,
                 decoration: InputDecoration(
                   labelText: 'المستهدفين',
                   border: OutlineInputBorder(

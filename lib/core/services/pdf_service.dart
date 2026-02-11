@@ -511,7 +511,7 @@ class PdfService {
       // Validate file size is reasonable (at least 1KB, max 50MB)
       if (fileSize < 1024) {
         await file.delete();
-        throw Exception('حجم الملف صغير جداً (${fileSize} bytes)');
+        throw Exception('حجم الملف صغير جداً ($fileSize bytes)');
       }
 
       if (fileSize > 50 * 1024 * 1024) {

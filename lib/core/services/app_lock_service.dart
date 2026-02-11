@@ -205,7 +205,7 @@ class _AppLockScreen extends StatelessWidget {
                   SizedBox(height: 48),
 
                   // Unlock Button
-                  Container(
+                  SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () => appLockService.unlockApp(),

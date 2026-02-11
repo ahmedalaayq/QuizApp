@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
-import 'package:quiz_app/core/theme/app_theme.dart';
-import 'package:quiz_app/core/theme/theme_controller.dart';
 
 class AssessmentProgressHeader extends StatelessWidget {
   final double progress;

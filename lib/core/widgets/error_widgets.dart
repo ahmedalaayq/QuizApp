@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
 import 'package:quiz_app/core/widgets/animated_widgets.dart';

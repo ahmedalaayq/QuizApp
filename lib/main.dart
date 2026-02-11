@@ -8,7 +8,6 @@ import 'package:quiz_app/core/services/notification_service.dart';
 import 'package:quiz_app/core/services/auth_service.dart';
 import 'package:quiz_app/core/services/connectivity_service.dart';
 import 'package:quiz_app/core/services/app_lock_service.dart';
-import 'package:quiz_app/core/services/maintenance_service.dart';
 import 'package:get/get.dart';
 
 void main() async {

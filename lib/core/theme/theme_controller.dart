@@ -28,8 +28,8 @@ class ThemeController extends GetxController {
 
   void _loadThemeFromStorage() {
     final settings = HiveService.getSettings();
-    if (settings != null && settings.themeMode != null) {
-      final savedTheme = settings.themeMode!;
+    if (settings != null) {
+      final savedTheme = settings.themeMode;
       switch (savedTheme) {
         case 'light':
           themeMode.value = ThemeMode.light;

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quiz_app/core/router/app_routes.dart';
 import 'package:quiz_app/core/services/auth_service.dart';
 import 'package:quiz_app/core/services/connectivity_service.dart';
 import 'package:quiz_app/core/services/firebase_service.dart';
@@ -392,7 +393,7 @@ class AdminController extends GetxController {
       if (enabled) {
         // Give a small delay for the snackbar to show
         Future.delayed(const Duration(seconds: 1), () {
-          Get.offAllNamed('/maintenance');
+          Get.offAllNamed(AppRoutes.maintenanceView);
         });
       }
     } catch (e, stackTrace) {

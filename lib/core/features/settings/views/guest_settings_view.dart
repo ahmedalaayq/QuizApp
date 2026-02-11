@@ -105,7 +105,7 @@ class GuestSettingsView extends StatelessWidget {
                     child: Switch(
                       value: themeController.isCurrentlyDark,
                       onChanged: (value) => themeController.setTheme(value),
-                      activeColor: AppColors.primaryColor,
+                      activeThumbColor: AppColors.primaryColor,
                       activeTrackColor: AppColors.primaryColor.withValues(
                         alpha: 0.3,
                       ),

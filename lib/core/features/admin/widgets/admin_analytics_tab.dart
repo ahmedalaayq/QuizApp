@@ -178,7 +178,7 @@ class AdminAnalyticsTab extends StatelessWidget {
                     SizedBox(height: 12.h),
                     _buildMetricItem(
                       'متوسط التقييمات',
-                      '${(controller.totalAssessments.value / (controller.totalUsers.value > 0 ? controller.totalUsers.value : 1)).toStringAsFixed(1)}',
+                      (controller.totalAssessments.value / (controller.totalUsers.value > 0 ? controller.totalUsers.value : 1)).toStringAsFixed(1),
                       Icons.assessment,
                       Colors.blue,
                     ),
@@ -199,7 +199,7 @@ class AdminAnalyticsTab extends StatelessWidget {
                     Expanded(
                       child: _buildMetricItem(
                         'متوسط التقييمات',
-                        '${(controller.totalAssessments.value / (controller.totalUsers.value > 0 ? controller.totalUsers.value : 1)).toStringAsFixed(1)}',
+                        (controller.totalAssessments.value / (controller.totalUsers.value > 0 ? controller.totalUsers.value : 1)).toStringAsFixed(1),
                         Icons.assessment,
                         Colors.blue,
                       ),

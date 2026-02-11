@@ -10,6 +10,7 @@ import 'package:quiz_app/core/features/auth/views/forgot_password_view.dart';
 import 'package:quiz_app/core/features/auth/views/login_view.dart';
 import 'package:quiz_app/core/features/auth/views/register_view.dart';
 import 'package:quiz_app/core/features/home/views/home_view.dart';
+import 'package:quiz_app/core/features/maintenance/views/maintenance_view.dart';
 import 'package:quiz_app/core/features/offline/views/offline_view.dart';
 import 'package:quiz_app/core/features/on_boarding/views/on_boarding_view.dart';
 import 'package:quiz_app/core/features/quiz/views/quiz_view.dart';
@@ -24,6 +25,7 @@ import 'package:quiz_app/core/router/app_routes.dart';
 class RouterManager {
   static final Map<String, WidgetBuilder> mainAppRoutes = {
     AppRoutes.splashView: (context) => const AnimatedSplashView(),
+    AppRoutes.maintenanceView: (context) => const MaintenanceView(),
     // AppRoutes.splashView: (context) => const SplashView(),
     AppRoutes.onBoardingView: (context) => const OnBoardingView(),
     AppRoutes.loginView: (context) => const LoginView(),

@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:quiz_app/core/services/connectivity_service.dart';
 import 'package:quiz_app/core/services/logger_service.dart';
 
+import '../router/app_routes.dart';
+
 class MaintenanceService extends GetxController {
   static MaintenanceService get instance => Get.find();
 
@@ -53,8 +55,8 @@ class MaintenanceService extends GetxController {
                 );
 
                 // If maintenance mode is enabled, navigate to maintenance screen
-                if (newMaintenanceMode && Get.currentRoute != '/maintenance') {
-                  Get.offAllNamed('/maintenance');
+                if (newMaintenanceMode && Get.currentRoute != AppRoutes.maintenanceView) {
+                  Get.offAllNamed(AppRoutes.maintenanceView);
                 }
               }
             },

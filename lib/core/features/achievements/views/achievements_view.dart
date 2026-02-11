@@ -477,9 +477,9 @@ class AchievementsView extends StatelessWidget {
     bool isDarkMode,
   ) {
     Color rankColor = Colors.grey;
-    if (rank == 1)
+    if (rank == 1) {
       rankColor = Colors.amber;
-    else if (rank == 2)
+    } else if (rank == 2)
       rankColor = Colors.grey[400]!;
     else if (rank == 3)
       rankColor = Colors.brown;

@@ -5,7 +5,6 @@ import 'package:quiz_app/core/services/auth_service.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
 import 'package:quiz_app/core/widgets/animated_widgets.dart';
-import 'package:quiz_app/core/widgets/reusable_components.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});

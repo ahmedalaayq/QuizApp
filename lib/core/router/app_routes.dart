@@ -17,4 +17,5 @@ class AppRoutes {
   static const String achievements = '/achievements';
   static const String settings = '/settings';
   static const String guestSettings = '/guest-settings';
+  static const String maintenanceView = '/maintenanceView';
 }

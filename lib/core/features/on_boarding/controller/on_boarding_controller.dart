@@ -83,7 +83,7 @@ class OnBoardingController {
     );
   }
 
-  disposeController() {
+  void disposeController() {
     _dotsInputData.close();
     _dotsStreamController.close();
     _pageController.dispose();

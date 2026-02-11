@@ -45,5 +45,28 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Face ID / Touch ID Permission -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>نحتاج إلى Face ID أو Touch ID لحماية بياناتك الشخصية وتأمين التطبيق</string>
+	
+	<!-- Notifications Permission -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	
+	<!-- Camera Permission (if needed for future features) -->
+	<key>NSCameraUsageDescription</key>
+	<string>نحتاج إلى الكاميرا لالتقاط الصور</string>
+	
+	<!-- Photo Library Permission (if needed) -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>نحتاج إلى الوصول للصور لحفظ التقارير</string>
+	
+	<!-- Location Permission (if needed for analytics) -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>نحتاج إلى موقعك لتحسين الخدمة</string>
 </dict>
 </plist>

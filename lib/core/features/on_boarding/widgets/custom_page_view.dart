@@ -10,33 +10,31 @@ class CustomPageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          HeightSpacing(115.h),
-          SvgPicture.asset(
-            width: 227.w,
-            height: 398.h,
-            customPage.image,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        HeightSpacing(115.h),
+        SvgPicture.asset(
+          width: 227.w,
+          height: 398.h,
+          customPage.image,
+        ),
+        HeightSpacing(108.h),
+        Text(
+          customPage.title,
+          style: AppTextStyles.montserrat32w600.copyWith(color: Colors.black),
+        ),
+        HeightSpacing(24.h),
+        SizedBox(
+          width: 312.w,
+          height:97.h ,
+          child: Text(
+            textAlign: TextAlign.center,
+            customPage.subTitle,
+            style: AppTextStyles.montserrat21w400.copyWith(color: Colors.black),
           ),
-          HeightSpacing(108.h),
-          Text(
-            customPage.title,
-            style: AppTextStyles.montserrat32w600.copyWith(color: Colors.black),
-          ),
-          HeightSpacing(24.h),
-          SizedBox(
-            width: 312.w,
-            height:97.h ,
-            child: Text(
-              textAlign: TextAlign.center,
-              customPage.subTitle,
-              style: AppTextStyles.montserrat21w400.copyWith(color: Colors.black),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
     
   }

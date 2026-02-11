@@ -1,7 +1,6 @@
 import 'dart:io';
 
 void main(List<String> arguments) {
-  // التأكد من أن المستخدم قد أدخل اسم الـ feature
   if (arguments.isEmpty) {
     print('❌ رجاءً اكتب اسم الـ feature: ');
     print('مثال: dart tool/generate_feature.dart login 🇪🇬');
@@ -12,7 +11,6 @@ void main(List<String> arguments) {
   final className = capitalize(featureName);
   final basePath = 'lib/features/$featureName';
 
-  // قائمة المجلدات التي سيتم إنشاؤها
   final folders = [
     '$basePath/domain/entities',
     '$basePath/domain/repositories',
@@ -24,32 +22,25 @@ void main(List<String> arguments) {
     '$basePath/presentation/pages',
   ];
 
-  // إنشاء المجلدات المطلوبة
   for (final folder in folders) {
     Directory(folder).createSync(recursive: true);
   }
 
-  // إنشاء الطبقات المختلفة: Domain, Data, Presentation
-
-  // Domain Layer
   _createDomainFiles(basePath, featureName, className);
 
-  // Data Layer
   _createDataFiles(basePath, featureName, className);
 
-  // Presentation Layer
   _createPresentationFiles(basePath, featureName, className);
 
   print('✅ تم إنشاء الـ Feature "$featureName" مع الهيكل الكامل. 🇪🇬');
 }
 
 void _createDomainFiles(String basePath, String featureName, String className) {
-  // إنشاء الملفات الخاصة بالـ Domain Layer
   File(
     '$basePath/domain/entities/${featureName}_entity.dart',
   ).writeAsStringSync('''
 class ${className}Entity {
-  // TODO: Define entity fields
+
 }
 ''');
 
@@ -57,7 +48,7 @@ class ${className}Entity {
     '$basePath/domain/repositories/${featureName}_repository.dart',
   ).writeAsStringSync('''
 abstract class ${className}Repository {
-  // TODO: Define repository methods
+
 }
 ''');
 
@@ -71,13 +62,12 @@ class ${className}UseCase {
 
   ${className}UseCase(this.repository);
 
-  // TODO: Implement call logic
+
 }
 ''');
 }
 
 void _createDataFiles(String basePath, String featureName, String className) {
-  // إنشاء الملفات الخاصة بالـ Data Layer
   File('$basePath/data/models/${featureName}_model.dart').writeAsStringSync('''
 import '../../domain/entities/${featureName}_entity.dart';
 
@@ -85,7 +75,7 @@ class ${className}Model extends ${className}Entity {
   ${className}Model() : super();
 
   factory ${className}Model.fromJson(Map<String, dynamic> json) {
-    // TODO: Map JSON to model
+  
     return ${className}Model();
   }
 }
@@ -95,7 +85,7 @@ class ${className}Model extends ${className}Entity {
     '$basePath/data/datasources/${featureName}_remote_datasource.dart',
   ).writeAsStringSync('''
 abstract class ${className}RemoteDataSource {
-  // TODO: Define methods like login(email, password)
+
 }
 ''');
 
@@ -110,7 +100,7 @@ class ${className}RepositoryImpl implements ${className}Repository {
 
   ${className}RepositoryImpl(this.remoteDataSource);
 
-  // TODO: Implement repository logic
+
 }
 ''');
 }
@@ -120,7 +110,6 @@ void _createPresentationFiles(
   String featureName,
   String className,
 ) {
-  // إنشاء الملفات الخاصة بالـ Presentation Layer: Cubit و Page
   File(
     '$basePath/presentation/cubit/${featureName}_state.dart',
   ).writeAsStringSync('''
@@ -131,8 +120,8 @@ class ${className}Initial extends ${className}State {}
 class ${className}Loading extends ${className}State {}
 
 class ${className}Success extends ${className}State {
-  // final result;
-  // Success(this.result);
+
+
 }
 
 class ${className}Failure extends ${className}State {
@@ -153,8 +142,8 @@ class ${className}Cubit extends Cubit<${className}State> {
   Future<void> doSomething() async {
     emit(${className}Loading());
     try {
-      // Call usecase
-      // emit(${className}Success(result));
+    
+    
     } catch (e) {
       emit(${className}Failure(e.toString()));
     }

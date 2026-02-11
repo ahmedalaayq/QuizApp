@@ -1,0 +1,923 @@
+import 'package:quiz_app/core/models/assessment_model.dart';
+
+/// مكتبة الاختبارات النفسية الموحدة
+class AssessmentsData {
+  static Assessment getDASS21Assessment() {
+    return Assessment(
+      id: 'dass21',
+      title: 'مقياس الاكتئاب والقلق والإجهاد (DASS-21)',
+      description: 'يقيس درجات الاكتئاب والقلق والإجهاد لديك',
+      assessmentType: 'DASS',
+      questions: [
+        Question(
+          id: 'dass_q1',
+          text: 'شعرت بصعوبة في الاسترخاء',
+          category: 'depression',
+          order: 1,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q2',
+          text: 'شعرت بجفاف الفم',
+          category: 'anxiety',
+          order: 2,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q3',
+          text: 'لم أتمكن من الشعور بأي شعور إيجابي',
+          category: 'depression',
+          order: 3,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q4',
+          text: 'شعرت بصعوبة في التنفس',
+          category: 'anxiety',
+          order: 4,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q5',
+          text: 'شعرت بصعوبة في البدء أو القيام بالأشياء',
+          category: 'depression',
+          order: 5,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q6',
+          text: 'أبالغت في رد الفعل تجاه الأشياء',
+          category: 'stress',
+          order: 6,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q7',
+          text: 'شعرت برعشة في جسدي (مثل الخوف)',
+          category: 'anxiety',
+          order: 7,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q8',
+          text: 'شعرت أن الحياة بلا معنى',
+          category: 'depression',
+          order: 8,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q9',
+          text: 'شعرت بالخوف بدون سبب واضح',
+          category: 'anxiety',
+          order: 9,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q10',
+          text: 'شعرت أن الحياة غير محتملة',
+          category: 'depression',
+          order: 10,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q11',
+          text: 'شعرت بسهولة بالاستثارة',
+          category: 'stress',
+          order: 11,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q12',
+          text: 'واجهت صعوبة في الاسترخاء',
+          category: 'stress',
+          order: 12,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q13',
+          text: 'شعرت بالحزن والاكتئاب',
+          category: 'depression',
+          order: 13,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q14',
+          text: 'لم أتمكن من تحمل أي شيء يتعطل في حياتي',
+          category: 'stress',
+          order: 14,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q15',
+          text: 'شعرت أنني على وشك الذعر',
+          category: 'anxiety',
+          order: 15,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q16',
+          text: 'لم أتمكن من الإثارة حول أي شيء',
+          category: 'depression',
+          order: 16,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q17',
+          text: 'شعرت بأن قيمتي كشخص قد انخفضت',
+          category: 'depression',
+          order: 17,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q18',
+          text: 'شعرت أنني سريع الغضب أو قريب من الانفجار',
+          category: 'stress',
+          order: 18,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q19',
+          text: 'شعرت بالخوف من القلق نفسه',
+          category: 'anxiety',
+          order: 19,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q20',
+          text: 'شعرت أنني غير قيمة',
+          category: 'depression',
+          order: 20,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'dass_q21',
+          text: 'شعرت بأن الحياة لا تستحق العيش',
+          category: 'depression',
+          order: 21,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لم تنطبق علي على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(
+              id: 'a2',
+              text: 'انطبقت علي إلى حد ما، أو بعض الوقت',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'انطبقت علي إلى حد كبير، أو معظم الوقت',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'انطبقت علي كثيراً جداً، أو معظم الوقت',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  static Assessment getAutismAssessment() {
+    return Assessment(
+      id: 'autism_assq',
+      title: 'مقياس التوحد المختصر (ASSQ)',
+      description: 'يقيم السلوكيات والخصائص المرتبطة بطيف التوحد',
+      assessmentType: 'AUTISM',
+      questions: [
+        Question(
+          id: 'autism_q1',
+          text: 'هل تواجه صعوبة في فهم ما يقصده الآخرون من تعابيرهم الوجهية؟',
+          category: 'social',
+          order: 1,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'قليلاً', score: 1, severity: 'mild'),
+            Answer(
+              id: 'a3',
+              text: 'إلى حد كبير',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(id: 'a4', text: 'نعم، بشدة', score: 3, severity: 'severe'),
+          ],
+        ),
+        Question(
+          id: 'autism_q2',
+          text: 'هل تفضل أن تكون وحدك بدلاً من مع الآخرين؟',
+          category: 'social',
+          order: 2,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'أحياناً', score: 1, severity: 'mild'),
+            Answer(id: 'a3', text: 'غالباً', score: 2, severity: 'moderate'),
+            Answer(id: 'a4', text: 'دائماً', score: 3, severity: 'severe'),
+          ],
+        ),
+        Question(
+          id: 'autism_q3',
+          text: 'هل لديك اهتمامات أو هوايات غير عادية أو مكثفة جداً؟',
+          category: 'restricted',
+          order: 3,
+          answers: [
+            Answer(id: 'a1', text: 'لا', score: 0, severity: 'none'),
+            Answer(
+              id: 'a2',
+              text: 'نعم، واحدة أو اثنتان',
+              score: 1,
+              severity: 'mild',
+            ),
+            Answer(
+              id: 'a3',
+              text: 'نعم، عدة اهتمامات',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'نعم، اهتمامات كثيرة جداً',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'autism_q4',
+          text: 'هل تشعر بعدم الارتياح عند حدوث تغييرات في الروتين اليومي؟',
+          category: 'restricted',
+          order: 4,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'قليلاً', score: 1, severity: 'mild'),
+            Answer(
+              id: 'a3',
+              text: 'إلى حد كبير',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(id: 'a4', text: 'نعم، بشدة', score: 3, severity: 'severe'),
+          ],
+        ),
+        Question(
+          id: 'autism_q5',
+          text: 'هل تجد صعوبة في الحفاظ على النظر المباشر مع الآخرين؟',
+          category: 'social',
+          order: 5,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'قليلاً', score: 1, severity: 'mild'),
+            Answer(
+              id: 'a3',
+              text: 'إلى حد كبير',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(id: 'a4', text: 'نعم، بشدة', score: 3, severity: 'severe'),
+          ],
+        ),
+        Question(
+          id: 'autism_q6',
+          text: 'هل تشعر بحساسية زائدة تجاه الأصوات أو الضوء أو اللمس؟',
+          category: 'sensory',
+          order: 6,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'قليلاً', score: 1, severity: 'mild'),
+            Answer(
+              id: 'a3',
+              text: 'إلى حد كبير',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(
+              id: 'a4',
+              text: 'نعم، بشدة جداً',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'autism_q7',
+          text: 'هل تكرر حركات معينة أو كلمات بشكل متكرر؟',
+          category: 'restricted',
+          order: 7,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'نادراً أو لا أبداً',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'أحياناً', score: 1, severity: 'mild'),
+            Answer(id: 'a3', text: 'كثيراً', score: 2, severity: 'moderate'),
+            Answer(
+              id: 'a4',
+              text: 'دائماً تقريباً',
+              score: 3,
+              severity: 'severe',
+            ),
+          ],
+        ),
+        Question(
+          id: 'autism_q8',
+          text: 'هل تجد صعوبة في بدء محادثات اجتماعية أو الحفاظ عليها؟',
+          category: 'social',
+          order: 8,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'قليلاً', score: 1, severity: 'mild'),
+            Answer(
+              id: 'a3',
+              text: 'إلى حد كبير',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(id: 'a4', text: 'نعم، بشدة', score: 3, severity: 'severe'),
+          ],
+        ),
+        Question(
+          id: 'autism_q9',
+          text: 'هل تشعر بأنك مختلف عن الآخرين؟',
+          category: 'social',
+          order: 9,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'قليلاً', score: 1, severity: 'mild'),
+            Answer(
+              id: 'a3',
+              text: 'إلى حد كبير',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(id: 'a4', text: 'نعم، بشدة', score: 3, severity: 'severe'),
+          ],
+        ),
+        Question(
+          id: 'autism_q10',
+          text: 'هل تفضل القواعد والنظام والدقة؟',
+          category: 'restricted',
+          order: 10,
+          answers: [
+            Answer(
+              id: 'a1',
+              text: 'لا على الإطلاق',
+              score: 0,
+              severity: 'none',
+            ),
+            Answer(id: 'a2', text: 'قليلاً', score: 1, severity: 'mild'),
+            Answer(
+              id: 'a3',
+              text: 'إلى حد كبير',
+              score: 2,
+              severity: 'moderate',
+            ),
+            Answer(id: 'a4', text: 'نعم، بشدة', score: 3, severity: 'severe'),
+          ],
+        ),
+      ],
+    );
+  }
+}

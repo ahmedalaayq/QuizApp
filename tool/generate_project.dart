@@ -141,14 +141,8 @@ Future<void> _generateCore(Directory libDir, String projectName) async {
       'app_theme.dart': _appThemeCode(),
       'app_colors.dart': _appColorsCode(),
     },
-    'cubit/locale': {
-      'locale_cubit.dart': _localeCubitCode(),
-      'locale_state.dart': _localeStateCode(),
-    },
-    'cubit/theme': {
-      'theme_cubit.dart': _themeCubitCode(),
-      'theme_state.dart': _themeStateCode(),
-    },
+    'cubit/locale': {'locale_cubit.dart': _localeCubitCode()},
+    'cubit/theme': {'theme_cubit.dart': _themeCubitCode()},
     'extensions': {
       'navigation_extensions.dart': _navigationExtCode(),
       'sizedbox_extensions.dart': _sizedBoxExtCode(),
@@ -214,14 +208,12 @@ Future<void> _generatePubspecYaml(
     rethrow;
   }
 
-  // استخراج إصدار Dart باستخدام RegExp
   final sdkMatch = RegExp(
     r'Dart\sSDK\sversion:\s(\d+\.\d+\.\d+)',
   ).firstMatch(flutterVersionOutput);
   final dartVersion = sdkMatch != null ? sdkMatch.group(1)! : '3.0.0';
   final dartVersionClean = dartVersion.replaceAll('^', '');
 
-  // استخراج إصدار Flutter
   final flutterMatch = RegExp(
     r'Flutter\s(\d+\.\d+\.\d+)',
   ).firstMatch(flutterVersionOutput);
@@ -304,7 +296,7 @@ class AppConstants {
 
 String _endpointConstantsCode() => '''
 class EndpointConstants {
- static const String baseUrl = 'https://api.example.com/v1';
+ static const String baseUrl = 'http
  // Add your endpoints here
 }
 ''';
@@ -370,27 +362,27 @@ class DioConsumer implements ApiConsumer {
 
 
  void _handleDioError(DioException error) {
-   // Handle different error types
+ 
  }
 
 
  @override
  Future delete(String path) {
-   // TODO: implement delete
+ 
    throw UnimplementedError();
  }
 
 
  @override
  Future post(String path, {Map<String, dynamic>? body}) {
-   // TODO: implement post
+ 
    throw UnimplementedError();
  }
 
 
  @override
  Future put(String path, {Map<String, dynamic>? body}) {
-   // TODO: implement put
+ 
    throw UnimplementedError();
  }
 }
@@ -405,7 +397,7 @@ import 'package:dio/dio.dart';
 class AppInterceptors extends Interceptor {
  @override
  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-   // Add headers or tokens if needed
+ 
    super.onRequest(options, handler);
  }
 
@@ -529,13 +521,13 @@ class AppPreferences {
  AppPreferences._internal();
 
 
- /// ✅ **تهيئة SharedPreferences**
+
  Future<void> init() async {
    _prefs = await SharedPreferences.getInstance();
  }
 
 
- /// ✅ **حفظ البيانات بأي نوع (`String, int, double, bool, List<String>`)**
+
  Future<void> setData(String key, dynamic value) async {
    if (value is String) {
      await _prefs.setString(key, value);
@@ -553,26 +545,26 @@ class AppPreferences {
  }
 
 
- /// ✅ **استرجاع البيانات (`String, int, double, bool, List<String>`)**
+
  dynamic getData(String key) {
    return _prefs.get(key);
  }
 
 
- /// ✅ **حذف بيانات مفتاح معين**
+
  Future<void> removeData(String key) async {
    await _prefs.remove(key);
  }
 
 
- /// ✅ **حفظ كائن Model (`T`)**
+
  Future<void> saveModel<T>(String key, T model, Map<String, dynamic> Function(T) toJson) async {
    final String jsonString = jsonEncode(toJson(model));
    await _prefs.setString(key, jsonString);
  }
 
 
- /// ✅ **استرجاع كائن Model (`T`)**
+
  T? getModel<T>(String key, T Function(Map<String, dynamic>) fromJson) {
    final String? jsonString = _prefs.getString(key);
    if (jsonString != null) {
@@ -583,14 +575,14 @@ class AppPreferences {
  }
 
 
- /// ✅ **حفظ قائمة من النماذج (`List<T>`)**
+
  Future<void> saveModels<T>(String key, List<T> models, Map<String, dynamic> Function(T) toJson) async {
    final List<String> jsonList = models.map((model) => jsonEncode(toJson(model))).toList();
    await _prefs.setStringList(key, jsonList);
  }
 
 
- /// ✅ **استرجاع قائمة من النماذج (`List<T>`)**
+
  List<T> getModels<T>(String key, T Function(Map<String, dynamic>) fromJson) {
    final List<String>? jsonList = _prefs.getStringList(key);
    if (jsonList != null) {
@@ -601,17 +593,17 @@ class AppPreferences {
 
 
  Future<void> clearExceptCredentials() async {
-   // حفظ بيانات تسجيل الدخول قبل الحذف
+ 
    String? savedEmail = _prefs.getString('saved_email');
    String? savedPassword = _prefs.getString('saved_password');
    bool? rememberMe = _prefs.getBool('remember_me');
 
 
-   // مسح كل البيانات
+ 
    await _prefs.clear();
 
 
-   // استرجاع بيانات تسجيل الدخول
+ 
    if (savedEmail != null) await _prefs.setString('saved_email', savedEmail);
    if (savedPassword != null) await _prefs.setString('saved_password', savedPassword);
    if (rememberMe != null) await _prefs.setBool('remember_me', rememberMe);
@@ -642,7 +634,7 @@ class LocaleService {
  static const _defaultLocale = Locale('en');
 
 
- /// Load saved locale or fallback
+
  Locale getCurrentLocale() {
 
 
@@ -654,7 +646,7 @@ class LocaleService {
  }
 
 
- /// Save locale and update easy_localization
+
  Future<void> setLocale(BuildContext context, String languageCode) async {
    await AppPreferences().setData(AppConstants.localeKey, languageCode);
    await context.setLocale(Locale(languageCode));
@@ -685,15 +677,15 @@ class AppTheme {
      scaffoldBackgroundColor:  AppColor.backgroundColor,
      fontFamily: 'Nunito',
      colorScheme: ColorScheme(
-       primary: AppColor.primaryColor, // اللون الثاني
-       secondary: Colors.green, // اللون الثانوي الثاني
-       surface: Colors.white, // خلفية التطبيقات
-       error: Colors.red, // اللون الخاص بالأخطاء
-       onPrimary: Colors.white, // اللون عند استخدام الـ primary
-       onSecondary: Colors.black, // اللون عند استخدام الـ secondary
-       onSurface: AppColor.grayColor, // اللون عند استخدام الـ background
-       onError: Colors.white, // اللون عند استخدام الـ error
-       brightness: Brightness.light, // مستوى السطوع (فاتح أو غامق)
+       primary: AppColor.primaryColor
+       secondary: Colors.green
+       surface: Colors.white
+       error: Colors.red
+       onPrimary: Colors.white
+       onSecondary: Colors.black
+       onSurface: AppColor.grayColor
+       onError: Colors.white
+       brightness: Brightness.light
      ),
      appBarTheme: const AppBarTheme(
        elevation: 0,
@@ -1463,125 +1455,4 @@ class OnboardPage extends StatelessWidget {
 }
 
 
-''';
-
-String _loginScreenCode(String projectName) => '''
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:$projectName/core/routing/routes.dart';
-
-
-class LoginScreen extends StatelessWidget {
- const LoginScreen({super.key});
-
-
- @override
- Widget build(BuildContext context) {
-   return Scaffold(
-     appBar: AppBar(title: const Text('Login')),
-     body: Padding(
-       padding: EdgeInsets.all(20.w),
-       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.stretch,
-         children: [
-           TextField(decoration: const InputDecoration(labelText: 'Email')),
-           SizedBox(height: 16.h),
-           TextField(obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
-           SizedBox(height: 24.h),
-           ElevatedButton(
-             onPressed: () => Navigator.pushReplacementNamed(context, Routes.homeScreen),
-             child: const Text('Login'),
-           ),
-           SizedBox(height: 8.h),
-           TextButton(
-             onPressed: () => Navigator.pushNamed(context, Routes.signupScreen),
-             child: const Text("Don't have an account? Sign up"),
-           ),
-         ],
-       ),
-     ),
-   );
- }
-}
-''';
-
-String _signupScreenCode() => '''
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-
-class SignUpScreen extends StatelessWidget {
- const SignUpScreen({super.key});
-
-
- @override
- Widget build(BuildContext context) {
-   return Scaffold(
-     appBar: AppBar(title: const Text('Sign Up')),
-     body: Padding(
-       padding: EdgeInsets.all(20.w),
-       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.stretch,
-         children: [
-           const TextField(decoration: InputDecoration(labelText: 'Name')),
-           SizedBox(height: 16.h),
-           const TextField(decoration: InputDecoration(labelText: 'Email')),
-           SizedBox(height: 16.h),
-           const TextField(obscureText: true, decoration: InputDecoration(labelText: 'Password')),
-           SizedBox(height: 24.h),
-           ElevatedButton(
-             onPressed: () {},
-             child: const Text('Create Account'),
-           ),
-         ],
-       ),
-     ),
-   );
- }
-}
-''';
-String _themeStateCode() => '''
-part of 'theme_cubit.dart';
-
-
-class ThemeState {
- final ThemeMode themeMode;
-
-
- const ThemeState(this.themeMode);
-
-
- @override
- bool operator ==(Object other) {
-   if (identical(this, other)) return true;
-   return other is ThemeState && other.themeMode == themeMode;
- }
-
-
- @override
- int get hashCode => themeMode.hashCode;
-}
-''';
-
-String _localeStateCode() => '''
-part of 'locale_cubit.dart';
-
-
-class LocaleState {
- final Locale locale;
-
-
- const LocaleState(this.locale);
-
-
- @override
- bool operator ==(Object other) {
-   if (identical(this, other)) return true;
-   return other is LocaleState && other.locale == locale;
- }
-
-
- @override
- int get hashCode => locale.hashCode;
-}
 ''';

@@ -28,28 +28,67 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  cloud_firestore: ^6.1.2
   cupertino_icons: ^1.0.8
   dots_indicator: ^4.0.1
+  firebase_core: ^4.4.0
+  firebase_remote_config: ^6.1.4
   flutter:
     sdk: flutter
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.1.0
   get: ^4.7.2
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.1
   iconly: ^1.0.1
+  intl: ^0.20.2
+  supabase_flutter: ^2.12.0
+  uuid: ^4.5.2
+  
+  # قاعدة البيانات المحلية
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # الرسوم البيانية
+  fl_chart: ^1.1.1
+  
+  # PDF والطباعة
+  pdf: ^3.11.1
+  printing: ^5.13.2
+  path_provider: ^2.1.4
+  
+  # الرسوم المتحركة
+  lottie: ^3.1.2
+  
+  # الإشعارات
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  
+  # المشاركة
+  share_plus: ^10.0.2
+  
+  # الأمان
+  flutter_secure_storage: ^9.2.2
+  local_auth: ^2.3.0
+  
+  # اللغات
+  easy_localization: ^3.0.7
+  
 flutter_assets:
   assets_path: assets/images/
   output_path: lib/core/app_assets/
   filename: app_assets.dart
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
+  path: any
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -69,17 +108,16 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo-Medium.ttf
+          weight: 500
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

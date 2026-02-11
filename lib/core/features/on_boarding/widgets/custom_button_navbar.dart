@@ -1,4 +1,3 @@
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/core/features/on_boarding/controller/on_boarding_controller.dart';
 import 'package:quiz_app/core/features/on_boarding/widgets/custom_dots_indicator.dart';
@@ -6,7 +5,14 @@ import 'package:quiz_app/core/features/on_boarding/widgets/custom_text_button.da
 import 'package:quiz_app/core/styles/app_text_styles.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
-  const CustomBottomNavBar({super.key, required this.nextStreamOutputData, required this.onTapSkip, required this.onTapNext, required this.onTapDots, required this.dotsCount});
+  const CustomBottomNavBar({
+    super.key,
+    required this.nextStreamOutputData,
+    required this.onTapSkip,
+    required this.onTapNext,
+    required this.onTapDots,
+    required this.dotsCount,
+  });
   final Stream<int> nextStreamOutputData;
   final VoidCallback onTapSkip;
   final VoidCallback onTapNext;
@@ -22,7 +28,6 @@ class CustomBottomNavBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          //! Custom Button NavBar
           CustomTextButton(
             buttonName: 'Skip',
             onPressed: onTapSkip,
@@ -32,16 +37,20 @@ class CustomBottomNavBar extends StatelessWidget {
             dotsCount: dotsCount,
             dotsStream:
                 OnBoardingController.onBoardingController.dotsOutputData,
-            onTapDots:
-                (position) => onTapDots(position),
+            onTapDots: (position) => onTapDots(position),
           ),
           StreamBuilder<int>(
             initialData: 0,
             stream: nextStreamOutputData,
             builder: (context, snapshot) {
               return CustomTextButton(
-                buttonName: snapshot.data == null ? 'Next' : snapshot.data == dotsCount - 1 ? 'Start' : 'Next' ,
-                onPressed:onTapNext,
+                buttonName:
+                    snapshot.data == null
+                        ? 'Next'
+                        : snapshot.data == dotsCount - 1
+                        ? 'Start'
+                        : 'Next',
+                onPressed: onTapNext,
               );
             },
           ),

@@ -25,6 +25,8 @@ class HomeAssessmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -33,12 +35,28 @@ class HomeAssessmentCard extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: AppColors.whiteColor,
-            border: Border.all(color: color.withOpacity(0.18), width: 1.5),
+            gradient: LinearGradient(
+              colors:
+                  isDarkMode
+                      ? [const Color(0xFF2D3748), const Color(0xFF1A202C)]
+                      : [Colors.white, Colors.grey.shade50],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(
+              color:
+                  isDarkMode
+                      ? color.withValues(alpha: 0.3)
+                      : color.withValues(alpha: 0.18),
+              width: 1.5,
+            ),
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color:
+                    isDarkMode
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.04),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
@@ -51,7 +69,10 @@ class HomeAssessmentCard extends StatelessWidget {
                 height: 70.r,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [color.withOpacity(0.22), color.withOpacity(0.10)],
+                    colors: [
+                      color.withValues(alpha: 0.22),
+                      color.withValues(alpha: 0.10),
+                    ],
                   ),
                   shape: BoxShape.circle,
                 ),
@@ -65,7 +86,10 @@ class HomeAssessmentCard extends StatelessWidget {
                     Text(
                       title,
                       style: AppTextStyles.cairo16w700.copyWith(
-                        color: AppColors.primaryDark,
+                        color:
+                            isDarkMode
+                                ? const Color(0xFFF7FAFC)
+                                : AppColors.primaryDark,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -79,7 +103,10 @@ class HomeAssessmentCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.cairo12w400.copyWith(
-                        color: AppColors.greyDarkColor,
+                        color:
+                            isDarkMode
+                                ? const Color(0xFFA0AEC0)
+                                : AppColors.greyDarkColor,
                         height: 1.55,
                       ),
                     ),
@@ -92,8 +119,11 @@ class HomeAssessmentCard extends StatelessWidget {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.10),
+                            color: color.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(7.r),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Text(
                             questions,
@@ -109,13 +139,19 @@ class HomeAssessmentCard extends StatelessWidget {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.greyLightColor,
+                            color:
+                                isDarkMode
+                                    ? const Color(0xFF4A5568)
+                                    : AppColors.greyLightColor,
                             borderRadius: BorderRadius.circular(7.r),
                           ),
                           child: Text(
                             'يستغرق 3–6 دقائق',
                             style: AppTextStyles.cairo11w600.copyWith(
-                              color: AppColors.greyDarkColor,
+                              color:
+                                  isDarkMode
+                                      ? const Color(0xFFA0AEC0)
+                                      : AppColors.greyDarkColor,
                             ),
                           ),
                         ),
@@ -127,7 +163,10 @@ class HomeAssessmentCard extends StatelessWidget {
               SizedBox(width: 12.w),
               Icon(
                 Icons.arrow_forward_ios,
-                color: AppColors.greyMediumColor,
+                color:
+                    isDarkMode
+                        ? const Color(0xFFA0AEC0)
+                        : AppColors.greyMediumColor,
                 size: 18.r,
               ),
             ],

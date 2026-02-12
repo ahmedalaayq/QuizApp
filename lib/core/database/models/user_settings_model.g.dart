@@ -25,13 +25,14 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
       reminderFrequency: fields[5] as int,
       biometricEnabled: fields[6] as bool,
       lastAssessmentDate: fields[7] as DateTime?,
+      themeMode: fields[8] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserSettings obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.isDarkMode)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
       ..writeByte(6)
       ..write(obj.biometricEnabled)
       ..writeByte(7)
-      ..write(obj.lastAssessmentDate);
+      ..write(obj.lastAssessmentDate)
+      ..writeByte(8)
+      ..write(obj.themeMode);
   }
 
   @override

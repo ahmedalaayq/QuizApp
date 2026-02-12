@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
-import 'package:quiz_app/core/theme/app_theme.dart';
 
 /// Reusable Card Component
 class CustomCard extends StatelessWidget {
@@ -90,19 +90,13 @@ class CustomElevatedButton extends StatelessWidget {
       ),
       icon:
           isLoading
-              ? SizedBox(
-                width: 20.w,
-                height: 20.h,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    textColor ?? AppColors.whiteColor,
-                  ),
-                  strokeWidth: 2,
-                ),
+              ? LoadingAnimationWidget.staggeredDotsWave(
+                color: textColor ?? AppColors.whiteColor,
+                size: 20.r,
               )
               : icon != null
               ? Icon(icon, color: textColor ?? AppColors.whiteColor)
-              : SizedBox.shrink(),
+              : const SizedBox.shrink(),
       label: Text(
         label,
         style:
@@ -134,6 +128,7 @@ class CustomTextField extends StatelessWidget {
   final IconData? suffixIcon;
   final VoidCallback? onSuffixTap;
   final Color? backgroundColor;
+  final FocusNode focusNode;
 
   const CustomTextField({
     super.key,
@@ -150,10 +145,13 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.onSuffixTap,
     this.backgroundColor,
+    required this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,7 +160,7 @@ class CustomTextField extends StatelessWidget {
         TextFormField(
           onTapOutside: (event) => FocusScope.of(context).unfocus(),
           style: AppTextStyles.cairo14w500.copyWith(
-            color: AppTheme.darkTheme == true ? Colors.white : Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
           controller: controller,
           maxLines: obscureText ? 1 : maxLines,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/core/features/admin/controller/admin_controller.dart';
+import 'package:quiz_app/core/features/assessment/views/user_assessment_details_view.dart';
+import 'package:quiz_app/core/services/auth_service.dart';
 import 'package:quiz_app/core/services/super_admin_service.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
@@ -12,7 +14,10 @@ class AdminUsersTab extends StatelessWidget {
   final AdminController controller;
   final bool isDarkMode;
 
-  const AdminUsersTab({
+  // Focus nodes for search field
+  final _searchFocus = FocusNode();
+
+  AdminUsersTab({
     super.key,
     required this.controller,
     required this.isDarkMode,
@@ -102,7 +107,9 @@ class AdminUsersTab extends StatelessWidget {
 
   Widget _buildSearchField() {
     return TextField(
+      focusNode: _searchFocus,
       onChanged: (value) => controller.searchUsers(value),
+      textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: 'البحث عن مستخدم...',
         prefixIcon: const Icon(Icons.search),
@@ -271,6 +278,26 @@ class AdminUsersTab extends StatelessWidget {
     final role = user['role'] ?? 'student';
 
     return AnimatedCard(
+      onTap: () {
+        // Navigate to user details
+        final userId = user['uid'] ?? user['id'] ?? '';
+        final userName = user['name'] ?? 'مستخدم غير معروف';
+
+        if (userId.isNotEmpty) {
+          Get.to(
+            () => UserAssessmentDetailsView(userId: userId, userName: userName),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
+        } else {
+          Get.snackbar(
+            'خطأ',
+            'معرف المستخدم غير صحيح',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      },
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),
         padding: EdgeInsets.all(16.w),
@@ -360,6 +387,19 @@ class AdminUsersTab extends StatelessWidget {
                           color: isActive ? Colors.green : Colors.red,
                         ),
                       ),
+                      SizedBox(width: 8.w),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 12.r,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        'عرض التفاصيل',
+                        style: AppTextStyles.cairo10w400.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -373,14 +413,34 @@ class AdminUsersTab extends StatelessWidget {
   }
 
   Widget _buildUserActions(Map<String, dynamic> user, bool isActive) {
+    final authService = Get.find<AuthService>();
+
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 200) {
           // Use popup menu on small screens
           return PopupMenuButton<String>(
             onSelected: (value) => _handleUserAction(value, user),
-            itemBuilder:
-                (context) => [
+            itemBuilder: (context) {
+              final items = <PopupMenuEntry<String>>[];
+
+              // View details - available to all
+              items.add(
+                PopupMenuItem(
+                  value: 'view',
+                  child: Row(
+                    children: [
+                      Icon(Icons.visibility, size: 16.r),
+                      SizedBox(width: 8.w),
+                      const Text('عرض التفاصيل'),
+                    ],
+                  ),
+                ),
+              );
+
+              // Edit - only for admins and superAdmins
+              if (authService.isAdmin || authService.isSuperAdmin) {
+                items.add(
                   PopupMenuItem(
                     value: 'edit',
                     child: Row(
@@ -391,6 +451,12 @@ class AdminUsersTab extends StatelessWidget {
                       ],
                     ),
                   ),
+                );
+              }
+
+              // Role change - only for admins and superAdmins
+              if (authService.isAdmin || authService.isSuperAdmin) {
+                items.add(
                   PopupMenuItem(
                     value: 'role',
                     child: Row(
@@ -401,6 +467,12 @@ class AdminUsersTab extends StatelessWidget {
                       ],
                     ),
                   ),
+                );
+              }
+
+              // Activate/Deactivate - only for admins and superAdmins
+              if (authService.isAdmin || authService.isSuperAdmin) {
+                items.add(
                   PopupMenuItem(
                     value: isActive ? 'deactivate' : 'activate',
                     child: Row(
@@ -415,6 +487,12 @@ class AdminUsersTab extends StatelessWidget {
                       ],
                     ),
                   ),
+                );
+              }
+
+              // Delete - only for superAdmins
+              if (authService.isSuperAdmin) {
+                items.add(
                   PopupMenuItem(
                     value: 'delete',
                     child: Row(
@@ -425,45 +503,67 @@ class AdminUsersTab extends StatelessWidget {
                       ],
                     ),
                   ),
-                ],
+                );
+              }
+
+              return items;
+            },
           );
         } else {
           // Use icon buttons on larger screens
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // View details - available to all
               IconButton(
-                onPressed: () => _handleUserAction('edit', user),
-                icon: Icon(Icons.edit, size: 18.r, color: Colors.blue),
-                tooltip: 'تعديل',
+                onPressed: () => _handleUserAction('view', user),
+                icon: Icon(Icons.visibility, size: 18.r, color: Colors.blue),
+                tooltip: 'عرض التفاصيل',
               ),
-              IconButton(
-                onPressed: () => _handleUserAction('role', user),
-                icon: Icon(
-                  Icons.admin_panel_settings,
-                  size: 18.r,
-                  color: Colors.orange,
+
+              // Edit - only for admins and superAdmins
+              if (authService.isAdmin || authService.isSuperAdmin)
+                IconButton(
+                  onPressed: () => _handleUserAction('edit', user),
+                  icon: Icon(Icons.edit, size: 18.r, color: Colors.blue),
+                  tooltip: 'تعديل',
                 ),
-                tooltip: 'تغيير الدور',
-              ),
-              IconButton(
-                onPressed:
-                    () => _handleUserAction(
-                      isActive ? 'deactivate' : 'activate',
-                      user,
-                    ),
-                icon: Icon(
-                  isActive ? Icons.block : Icons.check_circle,
-                  size: 18.r,
-                  color: isActive ? Colors.red : Colors.green,
+
+              // Role change - only for admins and superAdmins
+              if (authService.isAdmin || authService.isSuperAdmin)
+                IconButton(
+                  onPressed: () => _handleUserAction('role', user),
+                  icon: Icon(
+                    Icons.admin_panel_settings,
+                    size: 18.r,
+                    color: Colors.orange,
+                  ),
+                  tooltip: 'تغيير الدور',
                 ),
-                tooltip: isActive ? 'تعطيل' : 'تفعيل',
-              ),
-              IconButton(
-                onPressed: () => _handleUserAction('delete', user),
-                icon: Icon(Icons.delete, size: 18.r, color: Colors.red),
-                tooltip: 'حذف',
-              ),
+
+              // Activate/Deactivate - only for admins and superAdmins
+              if (authService.isAdmin || authService.isSuperAdmin)
+                IconButton(
+                  onPressed:
+                      () => _handleUserAction(
+                        isActive ? 'deactivate' : 'activate',
+                        user,
+                      ),
+                  icon: Icon(
+                    isActive ? Icons.block : Icons.check_circle,
+                    size: 18.r,
+                    color: isActive ? Colors.red : Colors.green,
+                  ),
+                  tooltip: isActive ? 'تعطيل' : 'تفعيل',
+                ),
+
+              // Delete - only for superAdmins
+              if (authService.isSuperAdmin)
+                IconButton(
+                  onPressed: () => _handleUserAction('delete', user),
+                  icon: Icon(Icons.delete, size: 18.r, color: Colors.red),
+                  tooltip: 'حذف',
+                ),
             ],
           );
         }
@@ -473,6 +573,26 @@ class AdminUsersTab extends StatelessWidget {
 
   void _handleUserAction(String action, Map<String, dynamic> user) {
     switch (action) {
+      case 'view':
+        // Navigate to user details - available to all roles
+        final userId = user['uid'] ?? user['id'] ?? '';
+        final userName = user['name'] ?? 'مستخدم غير معروف';
+
+        if (userId.isNotEmpty) {
+          Get.to(
+            () => UserAssessmentDetailsView(userId: userId, userName: userName),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
+        } else {
+          Get.snackbar(
+            'خطأ',
+            'معرف المستخدم غير صحيح',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+        break;
       case 'edit':
         _showEditUserDialog(user);
         break;
@@ -516,6 +636,18 @@ class AdminUsersTab extends StatelessWidget {
   }
 
   void _showRoleDialog(Map<String, dynamic> user) {
+    // Check if current user is therapist - therapists cannot change roles
+    final authService = Get.find<AuthService>();
+    if (authService.isTherapist) {
+      Get.snackbar(
+        'غير مسموح',
+        'المعالجين النفسيين لا يمكنهم تغيير أدوار المستخدمين',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     String selectedRole = user['role'] ?? 'student';
 
     Get.dialog(
@@ -534,31 +666,40 @@ class AdminUsersTab extends StatelessWidget {
                     onChanged: (value) => setState(() => selectedRole = value!),
                   ),
                 ),
-                ListTile(
-                  title: const Text('معالج'),
-                  leading: Radio<String>(
-                    value: 'therapist',
-                    groupValue: selectedRole,
-                    onChanged: (value) => setState(() => selectedRole = value!),
+                // Only admins and superAdmins can assign therapist role
+                if (authService.isAdmin || authService.isSuperAdmin)
+                  ListTile(
+                    title: const Text('معالج'),
+                    leading: Radio<String>(
+                      value: 'therapist',
+                      groupValue: selectedRole,
+                      onChanged:
+                          (value) => setState(() => selectedRole = value!),
+                    ),
                   ),
-                ),
-                ListTile(
-                  title: const Text('مدير'),
-                  leading: Radio<String>(
-                    value: 'admin',
-                    groupValue: selectedRole,
-                    onChanged: (value) => setState(() => selectedRole = value!),
+                // Only superAdmins can assign admin role
+                if (authService.isSuperAdmin)
+                  ListTile(
+                    title: const Text('مدير'),
+                    leading: Radio<String>(
+                      value: 'admin',
+                      groupValue: selectedRole,
+                      onChanged:
+                          (value) => setState(() => selectedRole = value!),
+                    ),
                   ),
-                ),
-                ListTile(
-                  title: const Text('مدير عام'),
-                  subtitle: const Text('صلاحيات كاملة للنظام'),
-                  leading: Radio<String>(
-                    value: 'superAdmin',
-                    groupValue: selectedRole,
-                    onChanged: (value) => setState(() => selectedRole = value!),
+                // Only superAdmins can assign superAdmin role
+                if (authService.isSuperAdmin)
+                  ListTile(
+                    title: const Text('مدير عام'),
+                    subtitle: const Text('صلاحيات كاملة للنظام'),
+                    leading: Radio<String>(
+                      value: 'superAdmin',
+                      groupValue: selectedRole,
+                      onChanged:
+                          (value) => setState(() => selectedRole = value!),
+                    ),
                   ),
-                ),
               ],
             ),
             actions: [
@@ -595,6 +736,7 @@ class AdminUsersTab extends StatelessWidget {
     String newRole,
   ) async {
     final passwordController = TextEditingController();
+    final passwordFocus = FocusNode();
     bool isLoading = false;
 
     Get.dialog(
@@ -618,7 +760,17 @@ class AdminUsersTab extends StatelessWidget {
                 SizedBox(height: 16.h),
                 TextField(
                   controller: passwordController,
+                  focusNode: passwordFocus,
                   obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.password],
+                  onSubmitted: (_) async {
+                    if (passwordController.text.isNotEmpty && !isLoading) {
+                      // Trigger the same logic as the confirm button
+                      setState(() => isLoading = true);
+                      // ... rest of the logic
+                    }
+                  },
                   decoration: InputDecoration(
                     labelText: 'كلمة المرور',
                     border: OutlineInputBorder(

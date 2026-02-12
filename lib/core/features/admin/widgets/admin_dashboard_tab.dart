@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_navigation/src/routes/transitions_type.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:quiz_app/core/features/admin/controller/admin_controller.dart';
+import 'package:quiz_app/core/features/assessment/views/user_assessment_details_view.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
 import 'package:quiz_app/core/widgets/animated_widgets.dart';
@@ -33,6 +38,10 @@ class AdminDashboardTab extends StatelessWidget {
 
           // Recent Activity
           _buildRecentActivity(),
+          SizedBox(height: 24.h),
+
+          // Recent Assessments
+          _buildRecentAssessments(),
         ],
       ),
     );
@@ -175,165 +184,200 @@ class AdminDashboardTab extends StatelessWidget {
                   : Column(
                     children:
                         controller.recentUsers.map((user) {
-                          return Container(
-                            margin: EdgeInsets.only(bottom: 8.h),
-                            padding: EdgeInsets.all(12.w),
-                            decoration: BoxDecoration(
-                              color:
-                                  isDarkMode
-                                      ? const Color(
-                                        0xFF1A202C,
-                                      ).withValues(alpha: 0.5)
-                                      : Colors.grey.shade50,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: _getRoleColor(
-                                  user['role'] ?? 'student',
-                                ).withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                // User Avatar with Role Color
-                                Container(
-                                  width: 48.w,
-                                  height: 48.w,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        _getRoleColor(
-                                          user['role'] ?? 'student',
-                                        ),
-                                        _getRoleColor(
-                                          user['role'] ?? 'student',
-                                        ).withValues(alpha: 0.7),
-                                      ],
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    _getRoleIcon(user['role'] ?? 'student'),
-                                    color: Colors.white,
-                                    size: 24.r,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigate to user details
+                              final userId = user['uid'] ?? user['id'] ?? '';
+                              final userName =
+                                  user['name'] ?? 'مستخدم غير معروف';
 
-                                // User Info
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              user['name'] ?? 'غير محدد',
-                                              style: AppTextStyles.cairo14w600
-                                                  .copyWith(
-                                                    color:
-                                                        isDarkMode
-                                                            ? Colors.white
-                                                            : AppColors
-                                                                .primaryDark,
-                                                  ),
-                                            ),
+                              if (userId.isNotEmpty) {
+                                Get.to(
+                                  () => UserAssessmentDetailsView(
+                                    userId: userId,
+                                    userName: userName,
+                                  ),
+                                  transition: Transition.rightToLeft,
+                                  duration: const Duration(milliseconds: 300),
+                                );
+                              } else {
+                                Get.snackbar(
+                                  'خطأ',
+                                  'معرف المستخدم غير صحيح',
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                );
+                              }
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 8.h),
+                              padding: EdgeInsets.all(12.w),
+                              decoration: BoxDecoration(
+                                color:
+                                    isDarkMode
+                                        ? const Color(
+                                          0xFF1A202C,
+                                        ).withValues(alpha: 0.5)
+                                        : Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: _getRoleColor(
+                                    user['role'] ?? 'student',
+                                  ).withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  // User Avatar with Role Color
+                                  Container(
+                                    width: 48.w,
+                                    height: 48.w,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          _getRoleColor(
+                                            user['role'] ?? 'student',
                                           ),
-                                          // Role Badge
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 8.w,
-                                              vertical: 4.h,
+                                          _getRoleColor(
+                                            user['role'] ?? 'student',
+                                          ).withValues(alpha: 0.7),
+                                        ],
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      _getRoleIcon(user['role'] ?? 'student'),
+                                      color: Colors.white,
+                                      size: 24.r,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+
+                                  // User Info
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                user['name'] ?? 'غير محدد',
+                                                style: AppTextStyles.cairo14w600
+                                                    .copyWith(
+                                                      color:
+                                                          isDarkMode
+                                                              ? Colors.white
+                                                              : AppColors
+                                                                  .primaryDark,
+                                                    ),
+                                              ),
                                             ),
-                                            decoration: BoxDecoration(
-                                              color: _getRoleColor(
-                                                user['role'] ?? 'student',
-                                              ).withValues(alpha: 0.2),
-                                              borderRadius:
-                                                  BorderRadius.circular(12.r),
-                                              border: Border.all(
+                                            // Role Badge
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 8.w,
+                                                vertical: 4.h,
+                                              ),
+                                              decoration: BoxDecoration(
                                                 color: _getRoleColor(
                                                   user['role'] ?? 'student',
-                                                ).withValues(alpha: 0.5),
+                                                ).withValues(alpha: 0.2),
+                                                borderRadius:
+                                                    BorderRadius.circular(12.r),
+                                                border: Border.all(
+                                                  color: _getRoleColor(
+                                                    user['role'] ?? 'student',
+                                                  ).withValues(alpha: 0.5),
+                                                ),
                                               ),
-                                            ),
-                                            child: Text(
-                                              _getRoleText(
-                                                user['role'] ?? 'student',
-                                              ),
-                                              style: AppTextStyles.cairo10w600
-                                                  .copyWith(
-                                                    color: _getRoleColor(
-                                                      user['role'] ?? 'student',
+                                              child: Text(
+                                                _getRoleText(
+                                                  user['role'] ?? 'student',
+                                                ),
+                                                style: AppTextStyles.cairo10w600
+                                                    .copyWith(
+                                                      color: _getRoleColor(
+                                                        user['role'] ??
+                                                            'student',
+                                                      ),
                                                     ),
-                                                  ),
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.email_outlined,
-                                            size: 14.r,
-                                            color: Colors.grey,
-                                          ),
-                                          SizedBox(width: 4.w),
-                                          Expanded(
-                                            child: Text(
-                                              user['email'] ?? 'غير محدد',
-                                              style: AppTextStyles.cairo12w400
+                                          ],
+                                        ),
+                                        SizedBox(height: 4.h),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.email_outlined,
+                                              size: 14.r,
+                                              color: Colors.grey,
+                                            ),
+                                            SizedBox(width: 4.w),
+                                            Expanded(
+                                              child: Text(
+                                                user['email'] ?? 'غير محدد',
+                                                style: AppTextStyles.cairo12w400
+                                                    .copyWith(
+                                                      color: Colors.grey,
+                                                    ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 4.h),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.access_time,
+                                              size: 14.r,
+                                              color: Colors.grey,
+                                            ),
+                                            SizedBox(width: 4.w),
+                                            Text(
+                                              _getLastActivityText(user),
+                                              style: AppTextStyles.cairo11w400
                                                   .copyWith(color: Colors.grey),
-                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.access_time,
-                                            size: 14.r,
-                                            color: Colors.grey,
-                                          ),
-                                          SizedBox(width: 4.w),
-                                          Text(
-                                            _getLastActivityText(user),
-                                            style: AppTextStyles.cairo11w400
-                                                .copyWith(color: Colors.grey),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                            Spacer(),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 12.r,
+                                              color: Colors.grey,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
 
-                                // Status Indicator
-                                Container(
-                                  width: 12.w,
-                                  height: 12.w,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        user['isActive'] == true
-                                            ? Colors.green
-                                            : Colors.red,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: (user['isActive'] == true
-                                                ? Colors.green
-                                                : Colors.red)
-                                            .withValues(alpha: 0.3),
-                                        blurRadius: 4,
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
+                                  // Status Indicator
+                                  Container(
+                                    width: 12.w,
+                                    height: 12.w,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          user['isActive'] == true
+                                              ? Colors.green
+                                              : Colors.red,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: (user['isActive'] == true
+                                                  ? Colors.green
+                                                  : Colors.red)
+                                              .withValues(alpha: 0.3),
+                                          blurRadius: 4,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         }).toList(),
@@ -513,6 +557,329 @@ class AdminDashboardTab extends StatelessWidget {
       case 'student':
       default:
         return 'طالب';
+    }
+  }
+
+  Widget _buildRecentAssessments() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'الاختبارات الأخيرة',
+          style: AppTextStyles.cairo18w700.copyWith(
+            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors:
+                  isDarkMode
+                      ? [const Color(0xFF2D3748), const Color(0xFF1A202C)]
+                      : [Colors.white, Colors.grey.shade50],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color:
+                  isDarkMode
+                      ? const Color(0xFF4A5568)
+                      : Colors.grey.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Obx(
+            () =>
+                controller.recentAssessmentsForDashboard.isEmpty
+                    ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.h),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.assessment_outlined,
+                              size: 48.r,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 12.h),
+                            Text(
+                              'لا توجد اختبارات حديثة',
+                              style: AppTextStyles.cairo14w500.copyWith(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    : Column(
+                      children:
+                          controller.recentAssessmentsForDashboard.map((
+                            assessment,
+                          ) {
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigate to assessment details
+                                final userId = assessment['userId'] ?? '';
+                                final userName =
+                                    assessment['userName'] ??
+                                    'مستخدم غير معروف';
+
+                                if (userId.isNotEmpty) {
+                                  Get.to(
+                                    () => UserAssessmentDetailsView(
+                                      userId: userId,
+                                      userName: userName,
+                                    ),
+                                    transition: Transition.rightToLeft,
+                                    duration: const Duration(milliseconds: 300),
+                                  );
+                                } else {
+                                  Get.snackbar(
+                                    'خطأ',
+                                    'معرف المستخدم غير صحيح',
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                  );
+                                }
+                              },
+                              child: Container(
+                                margin: EdgeInsets.only(bottom: 8.h),
+                                padding: EdgeInsets.all(12.w),
+                                decoration: BoxDecoration(
+                                  color:
+                                      isDarkMode
+                                          ? const Color(
+                                            0xFF1A202C,
+                                          ).withValues(alpha: 0.5)
+                                          : Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  border: Border.all(
+                                    color: _getAssessmentTypeColor(
+                                      assessment['assessmentType'] ?? 'unknown',
+                                    ).withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    // Assessment Type Icon
+                                    Container(
+                                      width: 48.w,
+                                      height: 48.w,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            _getAssessmentTypeColor(
+                                              assessment['assessmentType'] ??
+                                                  'unknown',
+                                            ),
+                                            _getAssessmentTypeColor(
+                                              assessment['assessmentType'] ??
+                                                  'unknown',
+                                            ).withValues(alpha: 0.7),
+                                          ],
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        _getAssessmentTypeIcon(
+                                          assessment['assessmentType'] ??
+                                              'unknown',
+                                        ),
+                                        color: Colors.white,
+                                        size: 24.r,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+
+                                    // Assessment Info
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  assessment['assessmentName'] ??
+                                                      'اختبار غير محدد',
+                                                  style: AppTextStyles
+                                                      .cairo14w600
+                                                      .copyWith(
+                                                        color:
+                                                            isDarkMode
+                                                                ? Colors.white
+                                                                : AppColors
+                                                                    .primaryDark,
+                                                      ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              // Severity Badge
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 8.w,
+                                                  vertical: 4.h,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: _getSeverityColor(
+                                                    assessment['severity'] ??
+                                                        'غير محدد',
+                                                  ).withValues(alpha: 0.2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        12.r,
+                                                      ),
+                                                  border: Border.all(
+                                                    color: _getSeverityColor(
+                                                      assessment['severity'] ??
+                                                          'غير محدد',
+                                                    ).withValues(alpha: 0.5),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  assessment['severity'] ??
+                                                      'غير محدد',
+                                                  style: AppTextStyles
+                                                      .cairo10w600
+                                                      .copyWith(
+                                                        color: _getSeverityColor(
+                                                          assessment['severity'] ??
+                                                              'غير محدد',
+                                                        ),
+                                                      ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.person_outline,
+                                                size: 14.r,
+                                                color: Colors.grey,
+                                              ),
+                                              SizedBox(width: 4.w),
+                                              Expanded(
+                                                child: Text(
+                                                  assessment['userName'] ??
+                                                      'مستخدم غير معروف',
+                                                  style: AppTextStyles
+                                                      .cairo12w400
+                                                      .copyWith(
+                                                        color: Colors.grey,
+                                                      ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.access_time,
+                                                size: 14.r,
+                                                color: Colors.grey,
+                                              ),
+                                              SizedBox(width: 4.w),
+                                              Text(
+                                                assessment['createdAtString'] ??
+                                                    'غير محدد',
+                                                style: AppTextStyles.cairo11w400
+                                                    .copyWith(
+                                                      color: Colors.grey,
+                                                    ),
+                                              ),
+                                              Spacer(),
+                                              Text(
+                                                'النتيجة: ${assessment['score'] ?? 0}',
+                                                style: AppTextStyles.cairo11w600
+                                                    .copyWith(
+                                                      color: _getSeverityColor(
+                                                        assessment['severity'] ??
+                                                            'غير محدد',
+                                                      ),
+                                                    ),
+                                              ),
+                                              SizedBox(width: 8.w),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 12.r,
+                                                color: Colors.grey,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getAssessmentTypeColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'depression':
+        return Colors.blue;
+      case 'anxiety':
+        return Colors.orange;
+      case 'stress':
+        return Colors.red;
+      case 'adhd':
+        return Colors.purple;
+      case 'autism':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getAssessmentTypeIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'depression':
+        return Icons.sentiment_very_dissatisfied;
+      case 'anxiety':
+        return Icons.psychology;
+      case 'stress':
+        return Icons.warning;
+      case 'adhd':
+        return Icons.flash_on;
+      case 'autism':
+        return Icons.accessibility;
+      default:
+        return Icons.assessment;
+    }
+  }
+
+  Color _getSeverityColor(String severity) {
+    switch (severity) {
+      case 'خفيف':
+      case 'منخفض':
+        return Colors.green;
+      case 'متوسط':
+        return Colors.orange;
+      case 'شديد':
+      case 'عالي':
+        return Colors.red;
+      case 'شديد جداً':
+      case 'عالي جداً':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 

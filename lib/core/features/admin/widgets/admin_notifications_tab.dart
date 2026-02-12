@@ -235,6 +235,8 @@ class AdminNotificationsTab extends StatelessWidget {
   void _showNotificationDialog() {
     final titleController = TextEditingController();
     final messageController = TextEditingController();
+    final titleFocus = FocusNode();
+    final messageFocus = FocusNode();
     String selectedRole = 'all';
 
     Get.dialog(
@@ -246,6 +248,9 @@ class AdminNotificationsTab extends StatelessWidget {
             children: [
               TextField(
                 controller: titleController,
+                focusNode: titleFocus,
+                textInputAction: TextInputAction.next,
+                onSubmitted: (_) => messageFocus.requestFocus(),
                 decoration: InputDecoration(
                   labelText: 'عنوان الإشعار',
                   border: OutlineInputBorder(
@@ -256,7 +261,9 @@ class AdminNotificationsTab extends StatelessWidget {
               SizedBox(height: 12.h),
               TextField(
                 controller: messageController,
+                focusNode: messageFocus,
                 maxLines: 3,
+                textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
                   labelText: 'محتوى الإشعار',
                   border: OutlineInputBorder(

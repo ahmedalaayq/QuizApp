@@ -22,24 +22,39 @@ class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // Focus nodes for proper navigation
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _performLogin() async {
+    final authService = Get.find<AuthService>();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    final success = await authService.signIn(email: email, password: password);
+
+    if (success) {
+      Get.offAllNamed('/home');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final authService = Get.find<AuthService>();
     final connectivityService = Get.find<ConnectivityService>();
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = Get.isDarkMode;
 
     return Scaffold(
-      backgroundColor:
-          isDarkMode
-              ? Theme.of(context).scaffoldBackgroundColor
-              : AppColors.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -142,25 +157,24 @@ class _LoginViewState extends State<LoginView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              AnimatedWaveText(
+                              Text(
+                                'مرحباً بك',
                                 style: AppTextStyles.cairo20w700.copyWith(
                                   color:
                                       isDarkMode
                                           ? Colors.white
                                           : AppColors.primaryDark,
                                 ),
-                                text: 'مرحباً بك',
                               ),
                               SizedBox(height: 4.h),
-                              AnimatedTypewriterText(
+                              Text(
+                                'سجل دخولك للوصول إلى منصة التقييم النفسي',
                                 style: AppTextStyles.cairo14w400.copyWith(
                                   color:
                                       isDarkMode
                                           ? Colors.white70
                                           : Colors.black,
                                 ),
-                                text:
-                                    'سجل دخولك للوصول إلى منصة التقييم النفسي',
                               ),
                             ],
                           ),
@@ -218,8 +232,12 @@ class _LoginViewState extends State<LoginView> {
                     label: 'البريد الإلكتروني',
                     hint: 'أدخل بريدك الإلكتروني',
                     controller: _emailController,
+                    focusNode: _emailFocus,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
                     prefixIcon: Icons.email,
+                    autofillHints: const [AutofillHints.email],
+                    onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'يرجى إدخال البريد الإلكتروني';
@@ -241,8 +259,17 @@ class _LoginViewState extends State<LoginView> {
                     label: 'كلمة المرور',
                     hint: 'أدخل كلمة المرور',
                     controller: _passwordController,
+                    focusNode: _passwordFocus,
                     obscureText: true,
+                    textInputAction: TextInputAction.done,
                     prefixIcon: Icons.lock,
+                    autofillHints: const [AutofillHints.password],
+                    onFieldSubmitted: (_) {
+                      // Trigger login when password field is submitted
+                      if (_formKey.currentState!.validate()) {
+                        _performLogin();
+                      }
+                    },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'يرجى إدخال كلمة المرور';
@@ -288,17 +315,7 @@ class _LoginViewState extends State<LoginView> {
                       icon: Icons.login,
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          final email = _emailController.text.trim();
-                          final password = _passwordController.text.trim();
-
-                          final success = await authService.signIn(
-                            email: email,
-                            password: password,
-                          );
-
-                          if (success) {
-                            Get.offAllNamed('/home');
-                          }
+                          await _performLogin();
                         }
                       },
                     ),

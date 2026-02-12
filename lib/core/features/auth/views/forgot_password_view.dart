@@ -18,9 +18,13 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   final _emailController = TextEditingController();
   final _authService = Get.find<AuthService>();
 
+  // Focus node for email field
+  final _emailFocus = FocusNode();
+
   @override
   void dispose() {
     _emailController.dispose();
+    _emailFocus.dispose();
     super.dispose();
   }
 
@@ -108,8 +112,16 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                   label: 'البريد الإلكتروني',
                   hint: 'أدخل بريدك الإلكتروني',
                   controller: _emailController,
+                  focusNode: _emailFocus,
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
                   prefixIcon: Icons.email_outlined,
+                  autofillHints: const [AutofillHints.email],
+                  onFieldSubmitted: (_) {
+                    if (_formKey.currentState!.validate()) {
+                      _resetPassword();
+                    }
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'يرجى إدخال البريد الإلكتروني';

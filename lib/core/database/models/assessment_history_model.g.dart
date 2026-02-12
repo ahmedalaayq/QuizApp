@@ -27,13 +27,15 @@ class AssessmentHistoryAdapter extends TypeAdapter<AssessmentHistory> {
       interpretation: fields[7] as String,
       recommendations: (fields[8] as List).cast<String>(),
       durationInSeconds: fields[9] as int,
+      userId: fields[10] as String?,
+      userName: fields[11] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, AssessmentHistory obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -53,7 +55,11 @@ class AssessmentHistoryAdapter extends TypeAdapter<AssessmentHistory> {
       ..writeByte(8)
       ..write(obj.recommendations)
       ..writeByte(9)
-      ..write(obj.durationInSeconds);
+      ..write(obj.durationInSeconds)
+      ..writeByte(10)
+      ..write(obj.userId)
+      ..writeByte(11)
+      ..write(obj.userName);
   }
 
   @override

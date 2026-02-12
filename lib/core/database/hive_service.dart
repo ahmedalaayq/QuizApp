@@ -14,25 +14,105 @@ class HiveService {
     try {
       await Hive.initFlutter();
 
-      // Register adapters
-      if (!Hive.isAdapterRegistered(0)) {
-        Hive.registerAdapter(AssessmentHistoryAdapter());
-      }
-      if (!Hive.isAdapterRegistered(1)) {
-        Hive.registerAdapter(UserSettingsAdapter());
+      // Register adapters with error handling
+      try {
+        if (!Hive.isAdapterRegistered(0)) {
+          Hive.registerAdapter(AssessmentHistoryAdapter());
+        }
+        if (!Hive.isAdapterRegistered(1)) {
+          Hive.registerAdapter(UserSettingsAdapter());
+        }
+      } catch (e) {
+        LoggerService.warning(
+          'Adapter registration issue, clearing old data: $e',
+        );
+        // Clear any existing boxes that might have compatibility issues
+        await _clearOldBoxes();
+
+        // Re-register adapters
+        if (!Hive.isAdapterRegistered(0)) {
+          Hive.registerAdapter(AssessmentHistoryAdapter());
+        }
+        if (!Hive.isAdapterRegistered(1)) {
+          Hive.registerAdapter(UserSettingsAdapter());
+        }
       }
 
-      // Open boxes
-      await Hive.openBox<AssessmentHistory>(assessmentHistoryBox);
-      await Hive.openBox<UserSettings>(userSettingsBox);
-      await Hive.openBox(achievementsBox);
+      // Open boxes with error handling
+      try {
+        await Hive.openBox<AssessmentHistory>(assessmentHistoryBox);
+      } catch (e) {
+        LoggerService.warning('Assessment history box issue, recreating: $e');
+        await Hive.deleteBoxFromDisk(assessmentHistoryBox);
+        await Hive.openBox<AssessmentHistory>(assessmentHistoryBox);
+      }
+
+      try {
+        await Hive.openBox<UserSettings>(userSettingsBox);
+      } catch (e) {
+        LoggerService.warning('User settings box issue, recreating: $e');
+        await Hive.deleteBoxFromDisk(userSettingsBox);
+        await Hive.openBox<UserSettings>(userSettingsBox);
+      }
+
+      try {
+        await Hive.openBox(achievementsBox);
+      } catch (e) {
+        LoggerService.warning('Achievements box issue, recreating: $e');
+        await Hive.deleteBoxFromDisk(achievementsBox);
+        await Hive.openBox(achievementsBox);
+      }
 
       _isInitialized = true;
       LoggerService.info('HiveService initialized successfully');
     } catch (e, stackTrace) {
       LoggerService.error('Error initializing Hive', e, stackTrace);
-      rethrow;
+
+      // Try to recover by clearing all data
+      try {
+        await _clearAllBoxes();
+        await _initializeCleanBoxes();
+        _isInitialized = true;
+        LoggerService.info('HiveService recovered after clearing data');
+      } catch (recoveryError) {
+        LoggerService.error('Failed to recover HiveService', recoveryError);
+        rethrow;
+      }
     }
+  }
+
+  static Future<void> _clearOldBoxes() async {
+    try {
+      await Hive.deleteBoxFromDisk(assessmentHistoryBox);
+      await Hive.deleteBoxFromDisk(userSettingsBox);
+      await Hive.deleteBoxFromDisk(achievementsBox);
+    } catch (e) {
+      LoggerService.warning('Error clearing old boxes: $e');
+    }
+  }
+
+  static Future<void> _clearAllBoxes() async {
+    try {
+      final boxNames = [assessmentHistoryBox, userSettingsBox, achievementsBox];
+      for (final boxName in boxNames) {
+        try {
+          if (Hive.isBoxOpen(boxName)) {
+            await Hive.box(boxName).close();
+          }
+          await Hive.deleteBoxFromDisk(boxName);
+        } catch (e) {
+          LoggerService.warning('Error clearing box $boxName: $e');
+        }
+      }
+    } catch (e) {
+      LoggerService.warning('Error in _clearAllBoxes: $e');
+    }
+  }
+
+  static Future<void> _initializeCleanBoxes() async {
+    await Hive.openBox<AssessmentHistory>(assessmentHistoryBox);
+    await Hive.openBox<UserSettings>(userSettingsBox);
+    await Hive.openBox(achievementsBox);
   }
 
   static void _ensureInitialized() {

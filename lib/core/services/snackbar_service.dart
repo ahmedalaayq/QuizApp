@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SnackbarService {
-  static void showSuccess(String title, String message) {
+  static void showSuccess([String? title, String? message]) {
     final isDarkMode = Get.isDarkMode;
     Get.snackbar(
-      title,
-      message,
+      title ?? "",
+      message ?? "",
       backgroundColor: isDarkMode ? const Color(0xFF21262D) : Colors.green,
       colorText: isDarkMode ? const Color(0xFFF0F6FC) : Colors.white,
       snackPosition: SnackPosition.BOTTOM,
@@ -17,11 +17,11 @@ class SnackbarService {
     );
   }
 
-  static void showError(String title, String message) {
+  static void showError([String? title, String? message]) {
     final isDarkMode = Get.isDarkMode;
     Get.snackbar(
-      title,
-      message,
+      title ?? "",
+      message ?? "",
       backgroundColor: isDarkMode ? const Color(0xFF21262D) : Colors.red,
       colorText: isDarkMode ? const Color(0xFFF0F6FC) : Colors.white,
       snackPosition: SnackPosition.BOTTOM,
@@ -32,11 +32,11 @@ class SnackbarService {
     );
   }
 
-  static void showWarning(String title, String message) {
+  static void showWarning([String? title, String? message]) {
     final isDarkMode = Get.isDarkMode;
     Get.snackbar(
-      title,
-      message,
+      title ?? "",
+      message ?? "",
       backgroundColor: isDarkMode ? const Color(0xFF21262D) : Colors.orange,
       colorText: isDarkMode ? const Color(0xFFF0F6FC) : Colors.white,
       snackPosition: SnackPosition.BOTTOM,

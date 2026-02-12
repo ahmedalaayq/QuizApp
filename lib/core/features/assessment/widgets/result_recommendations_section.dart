@@ -11,13 +11,15 @@ class ResultRecommendationsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'التوصيات والنصائح',
           style: AppTextStyles.cairo18w700.copyWith(
-            color: AppColors.primaryDark,
+            color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
         ),
         SizedBox(height: 15.h),
@@ -28,12 +30,19 @@ class ResultRecommendationsSection extends StatelessWidget {
               alignment: Alignment.center,
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: AppColors.whiteColor,
+                color:
+                    isDarkMode ? const Color(0xFF2D3748) : AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(color: AppColors.primaryLight, width: 1.5),
+                border: Border.all(
+                  color:
+                      isDarkMode
+                          ? const Color(0xFF4A5568)
+                          : AppColors.primaryLight,
+                  width: 1.5,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.04),
                     blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
@@ -65,7 +74,10 @@ class ResultRecommendationsSection extends StatelessWidget {
                     child: Text(
                       entry.value,
                       style: AppTextStyles.cairo12w400.copyWith(
-                        color: AppColors.primaryDark,
+                        color:
+                            isDarkMode
+                                ? Colors.grey[300]
+                                : AppColors.primaryDark,
                         height: 1.65,
                       ),
                     ),

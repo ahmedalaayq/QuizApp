@@ -2,41 +2,112 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 
-class CustomButton extends StatelessWidget {
+class CustomButton extends StatefulWidget {
   const CustomButton({
     super.key,
-    this.onPressed,
-    this.buttonName,
+    required this.onPressed,
+    required this.buttonName,
     this.backgroundColor,
     this.foregroundColor,
+    this.overlayColor,
     this.size,
-    this.radiusValue, this.buttonTextStyle, this.overlayColor,
+    this.radiusValue,
+    this.buttonTextStyle,
+    this.isGradient = false,
   });
+
   final VoidCallback? onPressed;
-  final String? buttonName;
+  final String buttonName;
   final Color? backgroundColor;
   final Color? foregroundColor;
   final Color? overlayColor;
   final Size? size;
   final double? radiusValue;
   final TextStyle? buttonTextStyle;
+  final bool isGradient;
+
+  @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton>
+    with SingleTickerProviderStateMixin {
+  double _scale = 1.0;
+
+  void _onTapDown(_) {
+    setState(() => _scale = 0.97);
+  }
+
+  void _onTapUp(_) {
+    setState(() => _scale = 1.0);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-        elevation: 5,
-        overlayColor: overlayColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radiusValue?.r ?? 20),
+    final bool isDisabled = widget.onPressed == null;
+
+    return AnimatedScale(
+      scale: _scale,
+      duration: const Duration(milliseconds: 120),
+      child: GestureDetector(
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: () => setState(() => _scale = 1.0),
+        child: Container(
+          width: widget.size?.width ?? 350.w,
+          height: widget.size?.height ?? 60.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.radiusValue?.r ?? 16.r),
+            gradient:
+                widget.isGradient && !isDisabled
+                    ? const LinearGradient(
+                      colors: [AppColors.primaryColor, AppColors.primaryDark],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                    : null,
+            color:
+                widget.isGradient
+                    ? null
+                    : isDisabled
+                    ? AppColors.greyMediumColor
+                    : widget.backgroundColor ?? AppColors.primaryColor,
+            boxShadow: [
+              if (!isDisabled)
+                BoxShadow(
+                  color: AppColors.primaryColor.withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(
+                widget.radiusValue?.r ?? 16.r,
+              ),
+              onTap: widget.onPressed,
+              overlayColor: WidgetStateProperty.all(
+                widget.overlayColor ?? Colors.white.withOpacity(0.08),
+              ),
+              child: Center(
+                child: Text(
+                  widget.buttonName,
+                  style:
+                      widget.buttonTextStyle ??
+                      TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: widget.foregroundColor ?? AppColors.whiteColor,
+                        letterSpacing: 0.5,
+                      ),
+                ),
+              ),
+            ),
+          ),
         ),
-        backgroundColor: backgroundColor ?? AppColors.primaryColor,
-        foregroundColor: foregroundColor ?? AppColors.whiteColor,
-        minimumSize: size ?? Size(350.w, 70.h),
       ),
-      onPressed: onPressed,
-      child: Text(buttonName ?? "",style: buttonTextStyle,),
     );
   }
 }

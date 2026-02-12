@@ -34,6 +34,12 @@ class AssessmentHistory extends HiveObject {
   @HiveField(9)
   final int durationInSeconds;
 
+  @HiveField(10)
+  final String? userId;
+
+  @HiveField(11)
+  final String? userName;
+
   AssessmentHistory({
     required this.id,
     required this.assessmentType,
@@ -45,6 +51,8 @@ class AssessmentHistory extends HiveObject {
     required this.interpretation,
     required this.recommendations,
     this.durationInSeconds = 0,
+    this.userId,
+    this.userName,
   });
 
   factory AssessmentHistory.fromJson(Map<String, dynamic> json) {
@@ -59,6 +67,8 @@ class AssessmentHistory extends HiveObject {
       interpretation: json['interpretation'] as String,
       recommendations: List<String>.from(json['recommendations'] as List),
       durationInSeconds: json['durationInSeconds'] as int? ?? 0,
+      userId: json['userId'] as String?,
+      userName: json['userName'] as String?,
     );
   }
 
@@ -74,6 +84,8 @@ class AssessmentHistory extends HiveObject {
       'interpretation': interpretation,
       'recommendations': recommendations,
       'durationInSeconds': durationInSeconds,
+      'userId': userId,
+      'userName': userName,
     };
   }
 

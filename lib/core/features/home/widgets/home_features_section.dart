@@ -91,23 +91,41 @@ class _FeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 420),
       curve: Curves.easeOutCubic,
-      builder: (context, t, child) => Transform.translate(
-        offset: Offset(0, (1 - t) * 10),
-        child: Opacity(opacity: t, child: child),
-      ),
+      builder:
+          (context, t, child) => Transform.translate(
+            offset: Offset(0, (1 - t) * 10),
+            child: Opacity(opacity: t, child: child),
+          ),
       child: Container(
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: AppColors.whiteColor,
+          gradient: LinearGradient(
+            colors:
+                isDarkMode
+                    ? [const Color(0xFF2D3748), const Color(0xFF1A202C)]
+                    : [Colors.white, Colors.grey.shade50],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: data.tint.withOpacity(0.14)),
+          border: Border.all(
+            color:
+                isDarkMode
+                    ? data.tint.withValues(alpha: 0.3)
+                    : data.tint.withValues(alpha: 0.14),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color:
+                  isDarkMode
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.04),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
@@ -120,8 +138,14 @@ class _FeatureCard extends StatelessWidget {
               width: 44.r,
               height: 44.r,
               decoration: BoxDecoration(
-                color: data.tint.withOpacity(0.10),
+                gradient: LinearGradient(
+                  colors: [
+                    data.tint.withValues(alpha: 0.15),
+                    data.tint.withValues(alpha: 0.08),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: data.tint.withValues(alpha: 0.2)),
               ),
               child: Icon(data.icon, color: data.tint, size: 24.r),
             ),
@@ -134,7 +158,10 @@ class _FeatureCard extends StatelessWidget {
                   Text(
                     data.title,
                     style: AppTextStyles.cairo14w700.copyWith(
-                      color: AppColors.primaryDark,
+                      color:
+                          isDarkMode
+                              ? const Color(0xFFF7FAFC)
+                              : AppColors.primaryDark,
                       height: 1.25,
                     ),
                   ),
@@ -142,7 +169,10 @@ class _FeatureCard extends StatelessWidget {
                   Text(
                     data.description,
                     style: AppTextStyles.cairo12w400.copyWith(
-                      color: AppColors.greyDarkColor,
+                      color:
+                          isDarkMode
+                              ? const Color(0xFFA0AEC0)
+                              : AppColors.greyDarkColor,
                       height: 1.55,
                     ),
                     maxLines: 3,
@@ -157,4 +187,3 @@ class _FeatureCard extends StatelessWidget {
     );
   }
 }
-

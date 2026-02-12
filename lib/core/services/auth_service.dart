@@ -229,6 +229,7 @@ class AuthService extends GetxController {
           colorText: Colors.white,
           duration: const Duration(seconds: 5),
         );
+        Get.toNamed(AppRoutes.loginView);
 
         return true;
       } catch (firestoreError) {

@@ -70,7 +70,9 @@ class ResultActions extends StatelessWidget {
               }
             },
             buttonName: 'تصدير كـ PDF',
-            buttonTextStyle: AppTextStyles.cairo16w700,
+            buttonTextStyle: AppTextStyles.cairo16w700.copyWith(
+              color: Colors.white,
+            ),
             radiusValue: 12.r,
           ),
         ),
@@ -81,14 +83,16 @@ class ResultActions extends StatelessWidget {
             foregroundColor: AppColors.whiteColor,
             onPressed: () => Get.offAllNamed(AppRoutes.home),
             buttonName: 'العودة للرئيسية',
-            buttonTextStyle: AppTextStyles.cairo16w700,
+            buttonTextStyle: AppTextStyles.cairo16w700.copyWith(
+              color: Colors.white,
+            ),
             radiusValue: 12.r,
           ),
         ),
         SizedBox(height: 12.h),
         Center(
           child: CustomButton(
-            backgroundColor: AppColors.primaryLight,
+            backgroundColor: AppColors.darkGreen,
             foregroundColor: AppColors.primaryColor,
             onPressed: () async {
               await ResultCopyShare.copyToClipboard(result);
@@ -101,7 +105,9 @@ class ResultActions extends StatelessWidget {
               );
             },
             buttonName: 'نسخ النتائج للمشاركة',
-            buttonTextStyle: AppTextStyles.cairo16w700,
+            buttonTextStyle: AppTextStyles.cairo16w700.copyWith(
+              color: Colors.white,
+            ),
             radiusValue: 12.r,
           ),
         ),

@@ -7,15 +7,12 @@ import 'package:quiz_app/core/widgets/custom_button.dart';
 class AssessmentBackButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const AssessmentBackButton({
-    super.key,
-    required this.onPressed,
-  });
+  const AssessmentBackButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 50),
       child: CustomButton(
         backgroundColor: AppColors.primaryLight,
         foregroundColor: AppColors.primaryColor,
@@ -27,4 +24,3 @@ class AssessmentBackButton extends StatelessWidget {
     );
   }
 }
-

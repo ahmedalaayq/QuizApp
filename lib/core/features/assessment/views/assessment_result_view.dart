@@ -16,11 +16,12 @@ class AssessmentResultView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AssessmentResult result = Get.arguments as AssessmentResult;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: isDarkMode ? Theme.of(context).scaffoldBackgroundColor : AppColors.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: isDarkMode ? const Color(0xFF1A202C) : AppColors.primaryColor,
         elevation: 2,
         shadowColor: AppColors.primaryColor.withOpacity(0.3),
         title: Text(
@@ -39,7 +40,7 @@ class AssessmentResultView extends StatelessWidget {
             Text(
               result.assessmentTitle,
               style: AppTextStyles.cairo20w700.copyWith(
-                color: AppColors.primaryDark,
+                color: isDarkMode ? Colors.white : AppColors.primaryDark,
               ),
             ),
             SizedBox(height: 20.h),

@@ -12,11 +12,12 @@ class HomeWelcomeCard extends StatelessWidget {
       tween: Tween(begin: 0.96, end: 1),
       duration: const Duration(milliseconds: 450),
       curve: Curves.easeOutCubic,
-      builder: (context, scale, child) => Transform.scale(
-        scale: scale,
-        alignment: Alignment.topCenter,
-        child: Opacity(opacity: scale, child: child),
-      ),
+      builder:
+          (context, scale, child) => Transform.scale(
+            scale: scale,
+            alignment: Alignment.topCenter,
+            child: Opacity(opacity: scale, child: child),
+          ),
       child: Container(
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
@@ -24,7 +25,7 @@ class HomeWelcomeCard extends StatelessWidget {
             colors: [
               AppColors.primaryColor,
               AppColors.primaryDark,
-              AppColors.secondaryColor.withOpacity(0.65),
+              AppColors.whiteColor.withValues(alpha: 0.65),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -32,7 +33,7 @@ class HomeWelcomeCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryColor.withOpacity(0.16),
+              color: AppColors.primaryColor.withValues(alpha: 0.16),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -51,27 +52,18 @@ class HomeWelcomeCard extends StatelessWidget {
             Text(
               'تقييمات مختصرة + تقارير قابلة للطباعة لمساعدتك في متابعة الحالة بوضوح.',
               style: AppTextStyles.cairo14w400.copyWith(
-                color: AppColors.whiteColor.withOpacity(0.96),
+                color: AppColors.whiteColor.withValues(alpha: 0.96),
                 height: 1.65,
               ),
             ),
             SizedBox(height: 14.h),
             Row(
               children: [
-                _Pill(
-                  icon: Icons.shield_outlined,
-                  label: 'خصوصية',
-                ),
+                _Pill(icon: Icons.shield_outlined, label: 'خصوصية'),
                 SizedBox(width: 10.w),
-                _Pill(
-                  icon: Icons.description_outlined,
-                  label: 'تقارير',
-                ),
+                _Pill(icon: Icons.description_outlined, label: 'تقارير'),
                 SizedBox(width: 10.w),
-                _Pill(
-                  icon: Icons.insights_outlined,
-                  label: 'تحليلات',
-                ),
+                _Pill(icon: Icons.insights_outlined, label: 'تحليلات'),
               ],
             ),
           ],
@@ -85,31 +77,30 @@ class _Pill extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _Pill({
-    required this.icon,
-    required this.label,
-  });
+  const _Pill({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor.withOpacity(0.14),
+        color: AppColors.whiteColor.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(
-          color: AppColors.whiteColor.withOpacity(0.18),
-        ),
+        border: Border.all(color: AppColors.whiteColor.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16.r, color: AppColors.whiteColor.withOpacity(0.95)),
+          Icon(
+            icon,
+            size: 16.r,
+            color: AppColors.whiteColor.withValues(alpha: 0.95),
+          ),
           SizedBox(width: 6.w),
           Text(
             label,
             style: AppTextStyles.cairo12w600.copyWith(
-              color: AppColors.whiteColor.withOpacity(0.95),
+              color: AppColors.whiteColor.withValues(alpha: 0.95),
             ),
           ),
         ],
@@ -117,4 +108,3 @@ class _Pill extends StatelessWidget {
     );
   }
 }
-

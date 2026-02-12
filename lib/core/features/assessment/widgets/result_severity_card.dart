@@ -13,17 +13,18 @@ class ResultSeverityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final severityColor = _getSeverityColor(result.overallSeverity);
     final severityIcon = _getSeverityIcon(result.overallSeverity);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: isDarkMode ? const Color(0xFF2D3748) : AppColors.whiteColor,
         border: Border.all(color: severityColor.withOpacity(0.28), width: 1.5),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.04),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -47,7 +48,7 @@ class ResultSeverityCard extends StatelessWidget {
           Text(
             'الحالة الإجمالية',
             style: AppTextStyles.cairo13w600.copyWith(
-              color: AppColors.greyDarkColor,
+              color: isDarkMode ? Colors.grey[400] : AppColors.greyDarkColor,
             ),
           ),
           SizedBox(height: 8.h),
@@ -59,7 +60,7 @@ class ResultSeverityCard extends StatelessWidget {
           Text(
             'الإجمالي: ${result.totalScore} نقطة',
             style: AppTextStyles.cairo14w500.copyWith(
-              color: AppColors.primaryDark,
+              color: isDarkMode ? Colors.white : AppColors.primaryDark,
             ),
           ),
         ],

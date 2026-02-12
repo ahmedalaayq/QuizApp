@@ -5,6 +5,8 @@ import 'package:quiz_app/core/router/app_routes.dart';
 import 'package:quiz_app/core/services/maintenance_service.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
+import 'package:quiz_app/core/widgets/error_widgets.dart';
+import 'package:quiz_app/core/services/logger_service.dart';
 
 class MaintenanceView extends StatefulWidget {
   const MaintenanceView({super.key});
@@ -14,8 +16,13 @@ class MaintenanceView extends StatefulWidget {
 }
 
 class _MaintenanceViewState extends State<MaintenanceView> {
-  late MaintenanceService maintenanceService;
+  late final MaintenanceService maintenanceService;
+
   bool _isInitialized = false;
+  bool _hasError = false;
+  String _errorMessage = '';
+
+  Worker? _maintenanceWorker;
 
   @override
   void initState() {
@@ -25,26 +32,66 @@ class _MaintenanceViewState extends State<MaintenanceView> {
 
   void _initializeService() {
     try {
-      // Try to get existing service first
       if (Get.isRegistered<MaintenanceService>()) {
         maintenanceService = Get.find<MaintenanceService>();
       } else {
-        maintenanceService = Get.put(MaintenanceService());
+        maintenanceService = Get.put(MaintenanceService(), permanent: true);
       }
+
+      _listenToMaintenance();
+
       setState(() {
         _isInitialized = true;
+        _hasError = false;
+        _errorMessage = '';
       });
-    } catch (e) {
-      // If there's an error, create a new service
-      maintenanceService = Get.put(MaintenanceService(), permanent: true);
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Error initializing maintenance service',
+        e,
+        stackTrace,
+      );
+
       setState(() {
-        _isInitialized = true;
+        _hasError = true;
+        _errorMessage = 'فشل في تهيئة خدمة الصيانة';
       });
     }
   }
 
+  void _listenToMaintenance() {
+    _maintenanceWorker?.dispose();
+
+    _maintenanceWorker = ever<bool>(
+      maintenanceService.isMaintenanceMode,
+      (isMaintenance) {
+        if (!isMaintenance) {
+          Get.offAllNamed(AppRoutes.splashView);
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _maintenanceWorker?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_hasError) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundColor,
+        body: ErrorScreen(
+          title: 'خطأ في خدمة الصيانة',
+          message: _errorMessage,
+          actionText: 'إعادة المحاولة',
+          onAction: _initializeService,
+        ),
+      );
+    }
+
     if (!_isInitialized) {
       return Scaffold(
         backgroundColor: AppColors.backgroundColor,
@@ -61,10 +108,6 @@ class _MaintenanceViewState extends State<MaintenanceView> {
           }
 
           if (!maintenanceService.isMaintenanceMode.value) {
-            // If maintenance mode is off, navigate to splash
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.offAllNamed(AppRoutes.splashView);
-            });
             return const SizedBox.shrink();
           }
 
@@ -80,7 +123,8 @@ class _MaintenanceViewState extends State<MaintenanceView> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+            valueColor:
+                AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -101,184 +145,44 @@ class _MaintenanceViewState extends State<MaintenanceView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Animated maintenance icon
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 800),
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
-                  child: Container(
-                    width: 150.w,
-                    height: 150.w,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryColor.withValues(alpha: 0.1),
-                          AppColors.primaryColor.withValues(alpha: 0.2),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryColor.withValues(alpha: 0.2),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.construction,
-                      size: 80.r,
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                );
-              },
+            Icon(
+              Icons.construction,
+              size: 100.r,
+              color: AppColors.primaryColor,
             ),
-            SizedBox(height: 40.h),
-
-            // Animated title
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 1000),
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Text(
-                      'التطبيق قيد الصيانة',
-                      style: AppTextStyles.cairo24w700.copyWith(
-                        color: AppColors.primaryColor,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                );
-              },
+            SizedBox(height: 30.h),
+            Text(
+              'التطبيق قيد الصيانة',
+              style: AppTextStyles.cairo24w700.copyWith(
+                color: AppColors.primaryColor,
+              ),
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 16.h),
-
-            // Animated message
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 1200),
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Text(
-                      maintenanceService.maintenanceMessage.value,
-                      style: AppTextStyles.cairo16w700.copyWith(
-                        color: Colors.grey[600],
-                        height: 1.6,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+            Obx(() => Text(
+                  maintenanceService.maintenanceMessage.value,
+                  style: AppTextStyles.cairo16w700.copyWith(
+                    color: Colors.grey[600],
+                    height: 1.6,
                   ),
-                );
-              },
-            ),
+                  textAlign: TextAlign.center,
+                )),
             SizedBox(height: 40.h),
-
-            // Animated info card
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 1400),
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Container(
-                      padding: EdgeInsets.all(20.w),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue.shade50,
-                            Colors.blue.shade100.withValues(alpha: 0.5),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(
-                          color: Colors.blue.shade200,
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Colors.blue[700],
-                            size: 32.r,
-                          ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            'نعمل على تحسين التطبيق لتقديم أفضل تجربة لك',
-                            style: AppTextStyles.cairo14w400.copyWith(
-                              color: Colors.blue[900],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            'سنعود قريباً!',
-                            style: AppTextStyles.cairo14w600.copyWith(
-                              color: Colors.blue[700],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: 40.h),
-
-            // Animated refresh button
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 1600),
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.scale(
-                    scale: value,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _refreshWithAnimation(),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('إعادة المحاولة'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 32.w,
-                          vertical: 16.h,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        elevation: 4,
-                        shadowColor: AppColors.primaryColor.withValues(
-                          alpha: 0.3,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+            ElevatedButton.icon(
+              onPressed: _refreshStatus,
+              icon: const Icon(Icons.refresh),
+              label: const Text('إعادة المحاولة'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 32.w,
+                  vertical: 14.h,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
             ),
           ],
         ),
@@ -286,14 +190,16 @@ class _MaintenanceViewState extends State<MaintenanceView> {
     );
   }
 
-  void _refreshWithAnimation() async {
-    // Show loading animation
-    setState(() {});
-
+  Future<void> _refreshStatus() async {
     try {
       await maintenanceService.refreshMaintenanceStatus();
-    } catch (e) {
-      // Handle error gracefully
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Error refreshing maintenance status',
+        e,
+        stackTrace,
+      );
+
       Get.snackbar(
         'خطأ',
         'فشل في التحقق من حالة الصيانة',

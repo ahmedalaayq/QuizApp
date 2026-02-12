@@ -8,6 +8,7 @@ import 'package:quiz_app/core/services/connectivity_service.dart';
 import 'package:quiz_app/core/services/firebase_service.dart';
 import 'package:quiz_app/core/services/logger_service.dart';
 import 'package:quiz_app/core/services/maintenance_service.dart';
+import 'package:quiz_app/core/services/snackbar_service.dart';
 import 'package:quiz_app/core/services/super_admin_service.dart';
 
 class AdminController extends GetxController {
@@ -59,12 +60,27 @@ class AdminController extends GetxController {
       await Future.wait([
         loadUsers(),
         loadSystemSettings(),
-        loadAnalytics(),
+        loadAnalytics(), // This now includes loadRecentAssessments()
         loadSystemAlerts(),
       ]);
+
+      // Log the results for debugging
+      LoggerService.info('Dashboard data loaded successfully:');
+      LoggerService.info('- Total users: ${totalUsers.value}');
+      LoggerService.info('- Active users: ${activeUsers.value}');
+      LoggerService.info('- Students: ${students.value}');
+      LoggerService.info('- Total assessments: ${totalAssessments.value}');
+      LoggerService.info('- Recent assessments: ${recentAssessments.length}');
     } catch (e, stackTrace) {
       LoggerService.error('Error loading dashboard data', e, stackTrace);
       error.value = 'فشل في تحميل بيانات لوحة التحكم';
+
+      // Try to load individual components that might work
+      try {
+        await loadSystemSettings();
+      } catch (settingsError) {
+        LoggerService.error('Failed to load system settings', settingsError);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -78,26 +94,74 @@ class AdminController extends GetxController {
         throw Exception('لا يوجد اتصال بالإنترنت');
       }
 
-      final querySnapshot =
-          await _firestore
-              .collection('users')
-              .orderBy('createdAt', descending: true)
-              .get();
+      // Try to load users with error handling for missing createdAt field
+      QuerySnapshot querySnapshot;
+      try {
+        querySnapshot =
+            await _firestore
+                .collection('users')
+                .orderBy('createdAt', descending: true)
+                .get();
+      } catch (e) {
+        // If ordering by createdAt fails, try without ordering
+        LoggerService.warning(
+          'Failed to order by createdAt, loading without order: $e',
+        );
+        querySnapshot = await _firestore.collection('users').get();
+      }
 
       users.value =
           querySnapshot.docs.map((doc) {
-            final data = doc.data();
+            final data = doc.data() as Map<String, dynamic>;
             data['uid'] = doc.id;
+
+            // Ensure required fields have default values
+            data['name'] = data['name'] ?? 'مستخدم غير معروف';
+            data['email'] = data['email'] ?? '';
+            data['role'] = data['role'] ?? 'student';
+            data['isActive'] = data['isActive'] ?? true;
+
+            // Add createdAt if missing
+            if (data['createdAt'] == null) {
+              data['createdAt'] = FieldValue.serverTimestamp();
+            }
+
             return data;
           }).toList();
 
       filteredUsers.value = users;
       _updateUserStatistics();
 
-      LoggerService.info('Loaded ${users.length} users');
+      LoggerService.info('Loaded ${users.length} users successfully');
     } catch (e, stackTrace) {
       LoggerService.error('Error loading users', e, stackTrace);
-      throw Exception('فشل في تحميل المستخدمين: ${e.toString()}');
+
+      // Try to load users without any constraints as fallback
+      try {
+        final fallbackQuery = await _firestore.collection('users').get();
+        users.value =
+            fallbackQuery.docs.map((doc) {
+              final data = doc.data();
+              data['uid'] = doc.id;
+              data['name'] = data['name'] ?? 'مستخدم غير معروف';
+              data['email'] = data['email'] ?? '';
+              data['role'] = data['role'] ?? 'student';
+              data['isActive'] = data['isActive'] ?? true;
+              return data;
+            }).toList();
+
+        filteredUsers.value = users;
+        _updateUserStatistics();
+
+        LoggerService.info('Loaded ${users.length} users via fallback method');
+      } catch (fallbackError, fallbackStackTrace) {
+        LoggerService.error(
+          'Fallback user loading also failed',
+          fallbackError,
+          fallbackStackTrace,
+        );
+        throw Exception('فشل في تحميل المستخدمين: ${e.toString()}');
+      }
     }
   }
 
@@ -146,15 +210,12 @@ class AdminController extends GetxController {
         'newStatus': isActive,
       });
 
-      Get.snackbar(
-        'نجح',
+      SnackbarService.showSuccess(
         isActive ? 'تم تفعيل المستخدم بنجاح' : 'تم تعطيل المستخدم بنجاح',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
       );
     } catch (e, stackTrace) {
       LoggerService.error('Error toggling user status', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في تحديث حالة المستخدم');
+      SnackbarService.showError('فشل في تحديث حالة المستخدم');
     }
   }
 
@@ -200,15 +261,10 @@ class AdminController extends GetxController {
         'newRole': newRole,
       });
 
-      Get.snackbar(
-        'نجح',
-        'تم تحديث دور المستخدم بنجاح',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      SnackbarService.showSuccess('تم تحديث دور المستخدم بنجاح');
     } catch (e, stackTrace) {
       LoggerService.error('Error updating user role', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في تحديث دور المستخدم');
+      SnackbarService.showError('فشل في تحديث دور المستخدم');
     }
   }
 
@@ -242,15 +298,10 @@ class AdminController extends GetxController {
       // Log action
       await _logAdminAction('delete_user', 'حذف مستخدم', {'userId': uid});
 
-      Get.snackbar(
-        'نجح',
-        'تم حذف المستخدم بنجاح',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      SnackbarService.showSuccess('تم حذف المستخدم بنجاح');
     } catch (e, stackTrace) {
       LoggerService.error('Error deleting user', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في حذف المستخدم');
+      SnackbarService.showError('فشل في حذف المستخدم');
     }
   }
 
@@ -302,16 +353,11 @@ class AdminController extends GetxController {
         // Reload users
         await loadUsers();
 
-        Get.snackbar(
-          'نجح',
-          'تم إنشاء المستخدم بنجاح',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        SnackbarService.showSuccess('تم إنشاء المستخدم بنجاح');
       }
     } catch (e, stackTrace) {
       LoggerService.error('Error creating user', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في إنشاء المستخدم: ${e.toString()}');
+      SnackbarService.showError('فشل في إنشاء المستخدم: ${e.toString()}');
     }
   }
 
@@ -321,9 +367,9 @@ class AdminController extends GetxController {
     try {
       // Load maintenance mode from Firestore
       isMaintenanceMode.value =
-          await FirebaseService.checkMaintenanceModeFromFirestore();
+          await FirebaseService.checkMaintenanceMode();
       maintenanceMessage.value =
-          await FirebaseService.getMaintenanceMessageFromFirestore();
+          await FirebaseService.getMaintenanceMessage();
 
       // Load other settings from Firestore
       final settingsDoc =
@@ -352,6 +398,7 @@ class AdminController extends GetxController {
         throw Exception('لا يوجد اتصال بالإنترنت');
       }
 
+      // Update Firestore
       await _firestore.collection('system_settings').doc('remote_config').set({
         'maintenance_mode': enabled,
         'maintenance_message': message ?? 'التطبيق قيد الصيانة حالياً',
@@ -359,46 +406,111 @@ class AdminController extends GetxController {
         'updatedBy': _auth.currentUser?.uid,
       }, SetOptions(merge: true));
 
+      // Update local state
       isMaintenanceMode.value = enabled;
       if (message != null) {
         maintenanceMessage.value = message;
       }
 
-      // Update MaintenanceService immediately
+      // Update MaintenanceService with error handling
       try {
-        final maintenanceService = Get.find<MaintenanceService>();
-        maintenanceService.isMaintenanceMode.value = enabled;
-        if (message != null) {
-          maintenanceService.maintenanceMessage.value = message;
+        if (Get.isRegistered<MaintenanceService>()) {
+          final maintenanceService = Get.find<MaintenanceService>();
+          maintenanceService.isMaintenanceMode.value = enabled;
+          if (message != null) {
+            maintenanceService.maintenanceMessage.value = message;
+          }
+
+          // Force refresh the maintenance service
+          await maintenanceService.refreshMaintenanceStatus();
+        } else {
+          // Create maintenance service if not registered
+          final maintenanceService = Get.put(MaintenanceService());
+          maintenanceService.isMaintenanceMode.value = enabled;
+          if (message != null) {
+            maintenanceService.maintenanceMessage.value = message;
+          }
         }
-      } catch (e) {
-        // MaintenanceService might not be initialized yet
-        LoggerService.error('MaintenanceService not found', e, null);
+      } catch (serviceError, serviceStackTrace) {
+        LoggerService.error(
+          'Error updating MaintenanceService',
+          serviceError,
+          serviceStackTrace,
+        );
+        // Don't throw here, just log the error
       }
 
       // Log action
-      await _logAdminAction('toggle_maintenance', 'تغيير وضع الصيانة', {
-        'enabled': enabled,
-        'message': message,
-      });
-
-      Get.snackbar(
-        'نجح',
-        enabled ? 'تم تفعيل وضع الصيانة' : 'تم إلغاء وضع الصيانة',
-        backgroundColor: enabled ? Colors.orange : Colors.green,
-        colorText: Colors.white,
-      );
-
-      // If maintenance mode is enabled, navigate to maintenance screen
-      if (enabled) {
-        // Give a small delay for the snackbar to show
-        Future.delayed(const Duration(seconds: 1), () {
-          Get.offAllNamed(AppRoutes.maintenanceView);
+      try {
+        await _logAdminAction('toggle_maintenance', 'تغيير وضع الصيانة', {
+          'enabled': enabled,
+          'message': message,
         });
+      } catch (logError) {
+        LoggerService.error('Error logging admin action', logError);
+        // Don't throw here, just log the error
+      }
+
+      // Show success message
+      if (enabled) {
+        SnackbarService.showWarning('تم تفعيل وضع الصيانة');
+      } else {
+        SnackbarService.showSuccess('تم إلغاء وضع الصيانة');
+      }
+
+      // Handle navigation for maintenance mode with better error handling
+      if (enabled) {
+        try {
+          // Give a small delay for the snackbar to show and services to update
+          await Future.delayed(const Duration(seconds: 1));
+
+          // Check if we can navigate safely
+          if (Get.context != null &&
+              Get.currentRoute != AppRoutes.maintenanceView) {
+            // Use a more robust navigation approach
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              try {
+                Get.offAllNamed(AppRoutes.maintenanceView);
+              } catch (navError) {
+                LoggerService.error('Error in post-frame navigation', navError);
+                // Fallback: show dialog instead of navigation
+                _showMaintenanceModeDialog();
+              }
+            });
+          }
+        } catch (delayError) {
+          LoggerService.error('Error in delayed navigation', delayError);
+          // Fallback: show dialog
+          _showMaintenanceModeDialog();
+        }
       }
     } catch (e, stackTrace) {
       LoggerService.error('Error toggling maintenance mode', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في تحديث وضع الصيانة');
+      SnackbarService.showError('فشل في تحديث وضع الصيانة: ${e.toString()}');
+    }
+  }
+
+  void _showMaintenanceModeDialog() {
+    try {
+      if (Get.context != null) {
+        Get.dialog(
+          AlertDialog(
+            title: const Text('وضع الصيانة'),
+            content: const Text(
+              'تم تفعيل وضع الصيانة. يرجى إعادة تشغيل التطبيق لرؤية التغييرات.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text('موافق'),
+              ),
+            ],
+          ),
+          barrierDismissible: false,
+        );
+      }
+    } catch (dialogError) {
+      LoggerService.error('Error showing maintenance dialog', dialogError);
     }
   }
 
@@ -447,17 +559,15 @@ class AdminController extends GetxController {
         updates,
       );
 
-      Get.snackbar(
-        'نجح',
-        'تم تحديث إعدادات التطبيق بنجاح',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      SnackbarService.showSuccess('تم تحديث إعدادات التطبيق بنجاح');
     } catch (e, stackTrace) {
       LoggerService.error('Error updating app settings', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في تحديث إعدادات التطبيق');
+      SnackbarService.showError('فشل في تحديث إعدادات التطبيق');
     }
   }
+
+  // Recent assessments for admin dashboard
+  var recentAssessments = <Map<String, dynamic>>[].obs;
 
   // ==================== Analytics ====================
 
@@ -479,7 +589,7 @@ class AdminController extends GetxController {
               .collection('assessment_results')
               .where(
                 'createdAt',
-                isGreaterThanOrEqualTo: today.toIso8601String(),
+                isGreaterThanOrEqualTo: Timestamp.fromDate(today),
               )
               .get();
       todayAssessments.value = todayQuery.docs.length;
@@ -490,7 +600,7 @@ class AdminController extends GetxController {
               .collection('assessment_results')
               .where(
                 'createdAt',
-                isGreaterThanOrEqualTo: weekAgo.toIso8601String(),
+                isGreaterThanOrEqualTo: Timestamp.fromDate(weekAgo),
               )
               .get();
       weeklyAssessments.value = weeklyQuery.docs.length;
@@ -501,10 +611,13 @@ class AdminController extends GetxController {
               .collection('assessment_results')
               .where(
                 'createdAt',
-                isGreaterThanOrEqualTo: monthAgo.toIso8601String(),
+                isGreaterThanOrEqualTo: Timestamp.fromDate(monthAgo),
               )
               .get();
       monthlyAssessments.value = monthlyQuery.docs.length;
+
+      // Load recent assessments (last 10)
+      await loadRecentAssessments();
 
       // System health check
       systemHealth.value = _calculateSystemHealth();
@@ -513,6 +626,153 @@ class AdminController extends GetxController {
     } catch (e, stackTrace) {
       LoggerService.error('Error loading analytics', e, stackTrace);
     }
+  }
+
+  Future<void> loadRecentAssessments() async {
+    try {
+      QuerySnapshot assessmentsQuery;
+
+      // Try to get recent assessments with ordering
+      try {
+        assessmentsQuery =
+            await _firestore
+                .collection('assessment_results')
+                .orderBy('createdAt', descending: true)
+                .limit(10)
+                .get();
+      } catch (e) {
+        LoggerService.warning(
+          'Failed to order by createdAt, trying timestamp: $e',
+        );
+        try {
+          assessmentsQuery =
+              await _firestore
+                  .collection('assessment_results')
+                  .orderBy('timestamp', descending: true)
+                  .limit(10)
+                  .get();
+        } catch (e2) {
+          LoggerService.warning(
+            'Failed to order by timestamp, loading without order: $e2',
+          );
+          assessmentsQuery =
+              await _firestore.collection('assessment_results').limit(10).get();
+        }
+      }
+
+      final List<Map<String, dynamic>> assessmentsList = [];
+      final Set<String> seenIds =
+          <String>{}; // Track seen IDs to prevent duplicates
+
+      for (final doc in assessmentsQuery.docs) {
+        try {
+          final data = doc.data() as Map<String, dynamic>;
+
+          // Check for duplicates using assessment ID or document ID
+          final assessmentId = data['id'] ?? doc.id;
+          if (seenIds.contains(assessmentId)) {
+            LoggerService.warning(
+              'Duplicate assessment found with ID: $assessmentId, skipping',
+            );
+            continue;
+          }
+          seenIds.add(assessmentId);
+
+          // Parse date
+          DateTime? createdAt;
+          try {
+            if (data['createdAt'] != null) {
+              createdAt = (data['createdAt'] as Timestamp).toDate();
+            } else if (data['timestamp'] != null) {
+              createdAt = (data['timestamp'] as Timestamp).toDate();
+            }
+          } catch (e) {
+            createdAt = DateTime.now();
+          }
+
+          final assessment = {
+            'id': doc.id,
+            'userId': data['userId'] ?? '',
+            'userName': await _getUserNameForAssessment(data),
+            'assessmentType':
+                data['assessmentType'] ?? data['assessmentId'] ?? 'غير محدد',
+            'assessmentName':
+                data['assessmentName'] ??
+                data['assessmentTitle'] ??
+                'اختبار غير محدد',
+            'score': data['score'] ?? data['totalScore'] ?? 0,
+            'severity':
+                data['severity'] ?? data['overallSeverity'] ?? 'غير محدد',
+            'createdAt': createdAt,
+            'createdAtString':
+                createdAt != null ? _formatDate(createdAt) : 'غير محدد',
+          };
+
+          assessmentsList.add(assessment);
+        } catch (e) {
+          LoggerService.warning('Error parsing assessment ${doc.id}: $e');
+        }
+      }
+
+      // Sort by date if not already sorted
+      assessmentsList.sort((a, b) {
+        final dateA = a['createdAt'] as DateTime?;
+        final dateB = b['createdAt'] as DateTime?;
+        if (dateA == null || dateB == null) return 0;
+        return dateB.compareTo(dateA);
+      });
+
+      recentAssessments.value = assessmentsList;
+      LoggerService.info('Loaded ${assessmentsList.length} recent assessments');
+    } catch (e, stackTrace) {
+      LoggerService.error('Error loading recent assessments', e, stackTrace);
+      recentAssessments.value = [];
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 60) {
+      return 'منذ ${difference.inMinutes} دقيقة';
+    } else if (difference.inHours < 24) {
+      return 'منذ ${difference.inHours} ساعة';
+    } else if (difference.inDays < 7) {
+      return 'منذ ${difference.inDays} يوم';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  // Helper method to get user name for assessments
+  Future<String> _getUserNameForAssessment(Map<String, dynamic> data) async {
+    // Try to get name from assessment data first
+    String userName =
+        data['userName'] ?? data['user_name'] ?? data['name'] ?? '';
+
+    // If no name found and we have userId, fetch from users collection
+    if (userName.isEmpty && data['userId'] != null) {
+      try {
+        final userDoc =
+            await _firestore.collection('users').doc(data['userId']).get();
+
+        if (userDoc.exists) {
+          final userData = userDoc.data()!;
+          userName =
+              userData['name'] ??
+              userData['displayName'] ??
+              userData['email']?.split('@')[0] ??
+              '';
+        }
+      } catch (e) {
+        LoggerService.warning(
+          'Could not fetch user name for ${data['userId']}: $e',
+        );
+      }
+    }
+
+    return userName.isNotEmpty ? userName : 'مستخدم غير معروف';
   }
 
   String _calculateSystemHealth() {
@@ -581,15 +841,10 @@ class AdminController extends GetxController {
         'targetRole': targetRole,
       });
 
-      Get.snackbar(
-        'نجح',
-        'تم إرسال الإشعار بنجاح',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      SnackbarService.showSuccess('تم إرسال الإشعار بنجاح');
     } catch (e, stackTrace) {
       LoggerService.error('Error sending notification', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في إرسال الإشعار');
+      SnackbarService.showError('فشل في إرسال الإشعار');
     }
   }
 
@@ -607,15 +862,10 @@ class AdminController extends GetxController {
         'timestamp': DateTime.now().toIso8601String(),
       });
 
-      Get.snackbar(
-        'نجح',
-        'تم بدء عملية تصدير البيانات',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      SnackbarService.showSuccess('تم بدء عملية تصدير البيانات');
     } catch (e, stackTrace) {
       LoggerService.error('Error exporting data', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في تصدير البيانات');
+      SnackbarService.showError('فشل في تصدير البيانات');
     }
   }
 
@@ -637,15 +887,10 @@ class AdminController extends GetxController {
         'type': 'manual',
       });
 
-      Get.snackbar(
-        'نجح',
-        'تم بدء عملية النسخ الاحتياطي',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      SnackbarService.showSuccess('تم بدء عملية النسخ الاحتياطي');
     } catch (e, stackTrace) {
       LoggerService.error('Error backing up database', e, stackTrace);
-      Get.snackbar('خطأ', 'فشل في النسخ الاحتياطي');
+      SnackbarService.showError('فشل في النسخ الاحتياطي');
     }
   }
 
@@ -687,7 +932,17 @@ class AdminController extends GetxController {
 
   // ==================== Getters ====================
 
-  List<Map<String, dynamic>> get recentUsers => users.take(5).toList();
+  List<Map<String, dynamic>> get recentUsers {
+    if (users.isEmpty) {
+      LoggerService.warning('No users available for recent users display');
+      return [];
+    }
+    return users.take(5).toList();
+  }
+
+  List<Map<String, dynamic>> get recentAssessmentsForDashboard {
+    return recentAssessments.take(5).toList();
+  }
 
   Map<String, int> get usersByRole => {
     'students': students.value,

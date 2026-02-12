@@ -63,6 +63,7 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   shimmer: ^3.0.0
   rive: ^0.13.13
+  loading_animation_widget: ^1.2.1
   
   # الإشعارات
   flutter_local_notifications: ^17.2.3

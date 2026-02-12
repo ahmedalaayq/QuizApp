@@ -6,6 +6,7 @@ import 'package:quiz_app/core/features/answer/views/answer_view.dart';
 import 'package:quiz_app/core/features/assessment/views/assessment_view.dart';
 import 'package:quiz_app/core/features/assessment/views/assessments_list_view.dart';
 import 'package:quiz_app/core/features/assessment/views/assessment_result_view.dart';
+import 'package:quiz_app/core/features/assessment/views/user_assessment_details_view.dart';
 import 'package:quiz_app/core/features/auth/views/forgot_password_view.dart';
 import 'package:quiz_app/core/features/auth/views/login_view.dart';
 import 'package:quiz_app/core/features/auth/views/register_view.dart';
@@ -37,6 +38,13 @@ class RouterManager {
     AppRoutes.assessmentsList: (context) => const AssessmentsListView(),
     AppRoutes.assessment: (context) => const AssessmentView(),
     AppRoutes.assessmentResult: (context) => const AssessmentResultView(),
+    AppRoutes.userAssessmentDetails: (context) {
+      final args = Get.arguments as Map<String, dynamic>?;
+      return UserAssessmentDetailsView(
+        userId: args?['userId'] ?? '',
+        userName: args?['userName'] ?? 'مستخدم غير محدد',
+      );
+    },
     AppRoutes.home: (context) => const HomeView(),
     AppRoutes.adminPanel: (context) => const AdminPanelView(),
     AppRoutes.statistics: (context) => const StatisticsView(),

@@ -210,6 +210,13 @@ class AppTextStyles {
     letterSpacing: 0.5,
     height: 1.4,
   );
+  static final cairo10w500 = TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 10.sp,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.5,
+    height: 1.4,
+  );
 
   static final montserrat32w700 = GoogleFonts.montserrat(
     fontSize: 32.sp,

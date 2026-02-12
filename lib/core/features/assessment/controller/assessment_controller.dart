@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/core/database/hive_service.dart';
@@ -128,15 +129,25 @@ class AssessmentController extends GetxController {
         final firestoreData = {
           'id': history.id,
           'userId': authService.currentUserId,
+          'userName':
+              authService.currentUser.value?.displayName ??
+              authService.currentUser.value?.email?.split('@')[0] ??
+              'مستخدم غير معروف',
+          'userEmail': authService.currentUser.value?.email,
           'assessmentType': history.assessmentType,
+          'assessmentName': history.assessmentTitle,
           'assessmentTitle': history.assessmentTitle,
           'completionDate': history.completionDate.toIso8601String(),
+          'score': history.totalScore,
           'totalScore': history.totalScore,
           'categoryScores': Map<String, dynamic>.from(history.categoryScores),
+          'severity': history.overallSeverity,
           'overallSeverity': history.overallSeverity,
           'interpretation': history.interpretation,
           'recommendations': List<String>.from(history.recommendations),
           'durationInSeconds': history.durationInSeconds,
+          'createdAt': FieldValue.serverTimestamp(),
+          'timestamp': FieldValue.serverTimestamp(),
         };
 
         LoggerService.info(

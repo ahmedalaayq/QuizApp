@@ -454,6 +454,7 @@ class AdminSystemSettingsTab extends StatelessWidget {
     final messageController = TextEditingController(
       text: controller.maintenanceMessage.value,
     );
+    final messageFocus = FocusNode();
 
     Get.dialog(
       AlertDialog(
@@ -467,7 +468,9 @@ class AdminSystemSettingsTab extends StatelessWidget {
                     SizedBox(height: 8.h),
                     TextField(
                       controller: messageController,
+                      focusNode: messageFocus,
                       maxLines: 3,
+                      textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
@@ -498,6 +501,9 @@ class AdminSystemSettingsTab extends StatelessWidget {
     final currentPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
+    final currentPasswordFocus = FocusNode();
+    final newPasswordFocus = FocusNode();
+    final confirmPasswordFocus = FocusNode();
     bool isLoading = false;
     bool showCurrentPassword = false;
     bool showNewPassword = false;
@@ -521,7 +527,11 @@ class AdminSystemSettingsTab extends StatelessWidget {
                   // Current Password
                   TextField(
                     controller: currentPasswordController,
+                    focusNode: currentPasswordFocus,
                     obscureText: !showCurrentPassword,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.password],
+                    onSubmitted: (_) => newPasswordFocus.requestFocus(),
                     decoration: InputDecoration(
                       labelText: 'كلمة المرور الحالية',
                       prefixIcon: const Icon(Icons.lock_outline),
@@ -546,7 +556,11 @@ class AdminSystemSettingsTab extends StatelessWidget {
                   // New Password
                   TextField(
                     controller: newPasswordController,
+                    focusNode: newPasswordFocus,
                     obscureText: !showNewPassword,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.newPassword],
+                    onSubmitted: (_) => confirmPasswordFocus.requestFocus(),
                     decoration: InputDecoration(
                       labelText: 'كلمة المرور الجديدة',
                       prefixIcon: const Icon(Icons.lock),
@@ -572,7 +586,10 @@ class AdminSystemSettingsTab extends StatelessWidget {
                   // Confirm Password
                   TextField(
                     controller: confirmPasswordController,
+                    focusNode: confirmPasswordFocus,
                     obscureText: !showConfirmPassword,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.newPassword],
                     decoration: InputDecoration(
                       labelText: 'تأكيد كلمة المرور الجديدة',
                       prefixIcon: const Icon(Icons.lock_reset),
@@ -698,12 +715,15 @@ class AdminSystemSettingsTab extends StatelessWidget {
     final versionController = TextEditingController(
       text: controller.appVersion.value,
     );
+    final versionFocus = FocusNode();
 
     Get.dialog(
       AlertDialog(
         title: const Text('تحديث إصدار التطبيق'),
         content: TextField(
           controller: versionController,
+          focusNode: versionFocus,
+          textInputAction: TextInputAction.done,
           decoration: InputDecoration(
             labelText: 'رقم الإصدار',
             border: OutlineInputBorder(

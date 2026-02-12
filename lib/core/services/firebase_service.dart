@@ -5,134 +5,93 @@ import 'package:get/get.dart';
 import 'package:quiz_app/core/services/logger_service.dart';
 
 class FirebaseService {
-  static FirebaseFirestore? _firestore;
+  static FirebaseFirestore? firestore;
   static FirebaseRemoteConfig? _remoteConfig;
   static bool _initialized = false;
 
+  // ================= INIT =================
   static Future<void> init() async {
     if (_initialized) return;
 
     try {
       await Firebase.initializeApp();
-      _firestore = FirebaseFirestore.instance;
+
+      firestore = FirebaseFirestore.instance;
       _remoteConfig = FirebaseRemoteConfig.instance;
 
-      LoggerService.info('Firebase initialized successfully');
-
       await _setupRemoteConfig();
+
       _initialized = true;
+
+      LoggerService.info('Firebase initialized successfully');
     } catch (e, stackTrace) {
       LoggerService.error('Firebase initialization error', e, stackTrace);
       _initialized = false;
     }
   }
 
-  // ---------------- Remote Config ----------------
+  // ================= REMOTE CONFIG =================
   static Future<void> _setupRemoteConfig() async {
     if (_remoteConfig == null) return;
 
-    try {
-      await _remoteConfig!.setConfigSettings(
-        RemoteConfigSettings(
-          fetchTimeout: const Duration(seconds: 10),
-          minimumFetchInterval: const Duration(seconds: 0),
-        ),
-      );
+    await _remoteConfig!.setConfigSettings(
+      RemoteConfigSettings(
+        fetchTimeout: const Duration(seconds: 10),
+        minimumFetchInterval: const Duration(hours: 1), // 🔥 آمن للإنتاج
+      ),
+    );
 
-      await _remoteConfig!.setDefaults({
-        'maintenance_mode': false,
-        'maintenance_message': 'التطبيق قيد الصيانة حالياً',
-        'min_app_version': '1.0.0',
-        'force_update': false,
-        'show_ads': false,
-        'premium_features_enabled': true,
-      });
+    await _remoteConfig!.setDefaults({
+      'maintenance_mode': false,
+      'maintenance_message': 'التطبيق قيد الصيانة حالياً',
+      'min_app_version': '1.0.0',
+      'force_update': false,
+      'show_ads': false,
+      'premium_features_enabled': true,
+    });
 
-      await _remoteConfig!.fetchAndActivate();
-      LoggerService.info('Remote Config setup completed');
-    } catch (e, stackTrace) {
-      LoggerService.error('Remote Config setup error', e, stackTrace);
-    }
+    await _remoteConfig!.fetchAndActivate();
   }
 
   static bool isMaintenanceMode() =>
       _remoteConfig?.getBool('maintenance_mode') ?? false;
+
   static String getMaintenanceMessage() =>
       _remoteConfig?.getString('maintenance_message') ??
       'التطبيق قيد الصيانة حالياً';
 
-  // Check maintenance mode from Firestore (for admin panel updates)
-  static Future<bool> checkMaintenanceModeFromFirestore() async {
-    if (_firestore == null) return false;
-
-    try {
-      final doc =
-          await _firestore!
-              .collection('system_settings')
-              .doc('remote_config')
-              .get();
-      if (doc.exists) {
-        return doc.data()?['maintenance_mode'] ?? false;
-      }
-      return false;
-    } catch (e, stackTrace) {
-      LoggerService.error(
-        'Error checking maintenance mode from Firestore',
-        e,
-        stackTrace,
-      );
-      return false;
-    }
-  }
-
-  static Future<String> getMaintenanceMessageFromFirestore() async {
-    if (_firestore == null) return 'التطبيق قيد الصيانة حالياً';
-
-    try {
-      final doc =
-          await _firestore!
-              .collection('system_settings')
-              .doc('remote_config')
-              .get();
-      if (doc.exists) {
-        return doc.data()?['maintenance_message'] ??
-            'التطبيق قيد الصيانة حالياً';
-      }
-      return 'التطبيق قيد الصيانة حالياً';
-    } catch (e, stackTrace) {
-      LoggerService.error(
-        'Error getting maintenance message from Firestore',
-        e,
-        stackTrace,
-      );
-      return 'التطبيق قيد الصيانة حالياً';
-    }
-  }
-
   static bool needsUpdate(String currentVersion) {
     final minVersion = _remoteConfig?.getString('min_app_version') ?? '1.0.0';
+
     return _compareVersions(currentVersion, minVersion) < 0;
   }
 
   static int _compareVersions(String v1, String v2) {
-    final parts1 = v1.split('.').map(int.parse).toList();
-    final parts2 = v2.split('.').map(int.parse).toList();
-    for (int i = 0; i < 3; i++) {
-      if (parts1[i] < parts2[i]) return -1;
-      if (parts1[i] > parts2[i]) return 1;
+    final parts1 = v1.split('.');
+    final parts2 = v2.split('.');
+
+    final maxLength =
+        parts1.length > parts2.length ? parts1.length : parts2.length;
+
+    for (int i = 0; i < maxLength; i++) {
+      final p1 = i < parts1.length ? int.tryParse(parts1[i]) ?? 0 : 0;
+      final p2 = i < parts2.length ? int.tryParse(parts2[i]) ?? 0 : 0;
+
+      if (p1 < p2) return -1;
+      if (p1 > p2) return 1;
     }
     return 0;
   }
 
-  // ---------------- Questions ----------------
+  // ================= QUESTIONS =================
   static Future<List<Map<String, dynamic>>> getQuestionsFromFirebase(
     String assessmentType,
   ) async {
-    if (_firestore == null) return [];
+    if (firestore == null) return [];
 
     try {
       final snapshot =
-          await _firestore!
+          await firestore!
               .collection('assessments')
               .doc(assessmentType)
               .collection('questions')
@@ -146,146 +105,98 @@ class FirebaseService {
     }
   }
 
-  static Future<void> addQuestion({
-    required String assessmentType,
-    required Map<String, dynamic> questionData,
-  }) async {
-    if (_firestore == null) return;
-
-    try {
-      await _firestore!
-          .collection('assessments')
-          .doc(assessmentType)
-          .collection('questions')
-          .add(questionData);
-
-      Get.snackbar(
-        'نجح',
-        'تم إضافة السؤال بنجاح',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      LoggerService.info('Question added successfully');
-    } catch (e, stackTrace) {
-      LoggerService.error('Failed to add question', e, stackTrace);
-      Get.snackbar(
-        'خطأ',
-        'فشل في إضافة السؤال',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  static Future<void> updateQuestion({
-    required String assessmentType,
-    required String questionId,
-    required Map<String, dynamic> questionData,
-  }) async {
-    if (_firestore == null) return;
-
-    try {
-      await _firestore!
-          .collection('assessments')
-          .doc(assessmentType)
-          .collection('questions')
-          .doc(questionId)
-          .update(questionData);
-
-      Get.snackbar(
-        'نجح',
-        'تم تحديث السؤال بنجاح',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      LoggerService.info('Question updated successfully');
-    } catch (e, stackTrace) {
-      LoggerService.error('Failed to update question', e, stackTrace);
-      Get.snackbar(
-        'خطأ',
-        'فشل في تحديث السؤال',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  static Future<void> deleteQuestion({
-    required String assessmentType,
-    required String questionId,
-  }) async {
-    if (_firestore == null) return;
-
-    try {
-      await _firestore!
-          .collection('assessments')
-          .doc(assessmentType)
-          .collection('questions')
-          .doc(questionId)
-          .delete();
-
-      Get.snackbar(
-        'نجح',
-        'تم حذف السؤال بنجاح',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      LoggerService.info('Question deleted successfully');
-    } catch (e, stackTrace) {
-      LoggerService.error('Failed to delete question', e, stackTrace);
-      Get.snackbar(
-        'خطأ',
-        'فشل في حذف السؤال',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  // ---------------- Assessment Result ----------------
+  // ================= SAVE ASSESSMENT RESULT =================
   static Future<void> saveAssessmentResult(Map<String, dynamic> result) async {
-    if (_firestore == null) {
-      LoggerService.error('Firestore not initialized', null, null);
-      return;
-    }
+    if (firestore == null) return;
 
     try {
-      final enrichedResult = {
-        ...result,
-        'timestamp': FieldValue.serverTimestamp(),
-        'createdAt': DateTime.now().toIso8601String(),
-        'status': 'completed',
-      };
+      final assessmentId = result['id'];
 
-      LoggerService.info(
-        'Saving assessment result: ${enrichedResult.keys.join(', ')}',
-      );
+      DocumentReference docRef;
 
-      final docRef = await _firestore!
-          .collection('assessment_results')
-          .add(enrichedResult);
+      if (assessmentId != null) {
+        docRef = firestore!.collection('assessment_results').doc(assessmentId);
 
-      LoggerService.info('Assessment result saved with ID: ${docRef.id}');
+        final existing = await docRef.get();
+        if (existing.exists) {
+          LoggerService.warning('Assessment already exists: $assessmentId');
+          return;
+        }
 
-      // Update user stats safely
+        await docRef.set({
+          ...result,
+          'createdAt': FieldValue.serverTimestamp(),
+          'timestamp': FieldValue.serverTimestamp(),
+          'status': 'completed',
+          'version': result['version'] ?? '2.0',
+        });
+      } else {
+        docRef = await firestore!.collection('assessment_results').add({
+          ...result,
+          'createdAt': FieldValue.serverTimestamp(),
+          'timestamp': FieldValue.serverTimestamp(),
+          'status': 'completed',
+          'version': result['version'] ?? '2.0',
+        });
+      }
+
+      // ✅ تحديث user stats (بدون كسر أي حاجة)
       if (result['userId'] != null) {
-        await _firestore!.collection('users').doc(result['userId']).update({
+        await firestore!.collection('users').doc(result['userId']).update({
           'lastAssessmentAt': FieldValue.serverTimestamp(),
-          'totalAssessments': FieldValue.increment(1),
           'lastAssessmentId': docRef.id,
           'lastAssessmentType': result['assessmentType'],
+          'lastAssessmentScore': result['score'] ?? result['totalScore'],
+          'totalAssessments': FieldValue.increment(1),
         });
-        LoggerService.info('User stats updated for: ${result['userId']}');
       }
+
+      LoggerService.info('Assessment saved successfully: ${docRef.id}');
     } catch (e, stackTrace) {
       LoggerService.error('Error saving assessment result', e, stackTrace);
       rethrow;
     }
   }
 
-  // ---------------- Payments ----------------
-  static Future<bool> checkPaymentStatus(String userId) async {
-    if (_firestore == null) return false;
+  // ================= LEADERBOARD =================
+  static Future<List<Map<String, dynamic>>> getLeaderboard() async {
+    if (firestore == null) return [];
 
     try {
-      final doc = await _firestore!.collection('payments').doc(userId).get();
+      final snapshot =
+          await firestore!
+              .collection('leaderboard')
+              .orderBy('totalScore', descending: true)
+              .limit(50)
+              .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'name': data['name'] ?? 'مستخدم',
+          'totalScore': data['totalScore'] ?? 0,
+          'completedAssessments': data['completedAssessments'] ?? 0,
+          'rank': data['rank'] ?? 0,
+        };
+      }).toList();
+    } catch (e, stackTrace) {
+      LoggerService.error('Error fetching leaderboard', e, stackTrace);
+      return [];
+    }
+  }
+
+  // ================= PAYMENT =================
+  static Future<bool> checkPaymentStatus(String userId) async {
+    if (firestore == null) return false;
+
+    try {
+      final doc = await firestore!.collection('payments').doc(userId).get();
+
       if (!doc.exists) return false;
 
       final expiryDate = (doc.data()?['expiryDate'] as Timestamp?)?.toDate();
+
       if (expiryDate == null) return false;
 
       return DateTime.now().isBefore(expiryDate);
@@ -295,74 +206,50 @@ class FirebaseService {
     }
   }
 
-  static Future<void> recordPayment({
-    required String userId,
-    required double amount,
-    required int durationDays,
-  }) async {
-    if (_firestore == null) return;
-
+  static Future<bool> checkMaintenanceMode() async {
     try {
-      final expiryDate = DateTime.now().add(Duration(days: durationDays));
+      if (firestore != null) {
+        final doc =
+            await firestore!
+                .collection('system_settings')
+                .doc('remote_config')
+                .get();
 
-      await _firestore!.collection('payments').doc(userId).set({
-        'amount': amount,
-        'purchaseDate': FieldValue.serverTimestamp(),
-        'expiryDate': Timestamp.fromDate(expiryDate),
-        'status': 'active',
-      });
+        if (doc.exists && doc.data()?['maintenance_mode'] != null) {
+          return doc.data()!['maintenance_mode'] as bool;
+        }
+      }
 
-      LoggerService.info('Payment recorded for user: $userId');
+      // fallback to Remote Config
+      return _remoteConfig?.getBool('maintenance_mode') ?? false;
     } catch (e, stackTrace) {
-      LoggerService.error('Error recording payment', e, stackTrace);
+      LoggerService.error('Error checking maintenance mode', e, stackTrace);
+
+      return false;
     }
   }
 
-  // ---------------- Remote Config Refresh ----------------
-  static Future<void> refreshRemoteConfig() async {
-    if (_remoteConfig == null) return;
+  // static Future<String> getMaintenanceMessage() async {
+  //   try {
+  //     if (firestore != null) {
+  //       final doc =
+  //           await firestore!
+  //               .collection('system_settings')
+  //               .doc('remote_config')
+  //               .get();
 
-    try {
-      await _remoteConfig!.fetchAndActivate();
-      LoggerService.info('Remote config refreshed');
-    } catch (e, stackTrace) {
-      LoggerService.error('Error refreshing remote config', e, stackTrace);
-    }
-  }
+  //       if (doc.exists && doc.data()?['maintenance_message'] != null) {
+  //         return doc.data()!['maintenance_message'] as String;
+  //       }
+  //     }
 
-  // ---------------- Leaderboard ----------------
-  static Future<List<Map<String, dynamic>>> getLeaderboard() async {
-    if (_firestore == null) {
-      LoggerService.error('Firestore not initialized', null, null);
-      return [];
-    }
+  //     // fallback to Remote Config
+  //     return _remoteConfig?.getString('maintenance_message') ??
+  //         'التطبيق قيد الصيانة حالياً';
+  //   } catch (e, stackTrace) {
+  //     LoggerService.error('Error getting maintenance message', e, stackTrace);
 
-    try {
-      final snapshot =
-          await _firestore!
-              .collection('leaderboard')
-              .orderBy('totalScore', descending: true)
-              .limit(50)
-              .get();
-
-      final leaderboard =
-          snapshot.docs.map((doc) {
-            final data = doc.data();
-            return {
-              'id': doc.id,
-              'name': data['name'] ?? 'مستخدم',
-              'totalScore': data['totalScore'] ?? 0,
-              'completedAssessments': data['completedAssessments'] ?? 0,
-              'rank': data['rank'] ?? 0,
-            };
-          }).toList();
-
-      LoggerService.info('Fetched ${leaderboard.length} leaderboard entries');
-
-      return leaderboard;
-    } catch (e, stackTrace) {
-      LoggerService.error('Error fetching leaderboard', e, stackTrace);
-      return [];
-    }
-  }
+  //     return 'التطبيق قيد الصيانة حالياً';
+  //   }
+  // }
 }

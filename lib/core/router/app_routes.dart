@@ -7,6 +7,7 @@ class AppRoutes {
   static const String assessmentsList = '/assessments-list';
   static const String assessment = '/assessment';
   static const String assessmentResult = '/assessment-result';
+  static const String userAssessmentDetails = '/user-assessment-details';
   static const String home = '/home';
   static const String studentProfile = '/student-profile';
   static const String studentReport = '/student-report';

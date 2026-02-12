@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quiz_app/core/services/animation_service.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
+import 'package:quiz_app/core/widgets/password_strength_widget.dart';
 
 class AnimatedCard extends StatelessWidget {
   final Widget child;
@@ -80,20 +84,24 @@ class _AnimatedButtonState extends State<AnimatedButton>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      onTap: widget.onPressed,
+      onTapDown: widget.isLoading ? null : (_) => _controller.forward(),
+      onTapUp: widget.isLoading ? null : (_) => _controller.reverse(),
+      onTapCancel: widget.isLoading ? null : () => _controller.reverse(),
+      onTap: widget.isLoading ? null : widget.onPressed,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {
           return Transform.scale(
-            scale: _scaleAnimation.value,
+            scale: widget.isLoading ? 1.0 : _scaleAnimation.value,
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 16.h),
+              height: 56.h, // Fixed height to prevent layout shifts
               decoration: BoxDecoration(
-                color: widget.backgroundColor ?? AppColors.primaryColor,
+                color:
+                    widget.isLoading
+                        ? (widget.backgroundColor ?? AppColors.primaryColor)
+                            .withValues(alpha: 0.8)
+                        : (widget.backgroundColor ?? AppColors.primaryColor),
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
@@ -104,30 +112,34 @@ class _AnimatedButtonState extends State<AnimatedButton>
                   ),
                 ],
               ),
-              child:
-                  widget.isLoading
-                      ? AnimationService.loadingDots(
-                        color: widget.textColor ?? Colors.white,
-                      )
-                      : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (widget.icon != null) ...[
-                            Icon(
-                              widget.icon,
-                              color: widget.textColor ?? Colors.white,
-                              size: 20.r,
+              child: Center(
+                child:
+                    widget.isLoading
+                        ? LoadingAnimationWidget.staggeredDotsWave(
+                          color: widget.textColor ?? Colors.white,
+                          size: 24.r,
+                        )
+                        : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.icon != null) ...[
+                              Icon(
+                                widget.icon,
+                                color: widget.textColor ?? Colors.white,
+                                size: 20.r,
+                              ),
+                              SizedBox(width: 8.w),
+                            ],
+                            Text(
+                              widget.text,
+                              style: AppTextStyles.cairo16w700.copyWith(
+                                color: widget.textColor ?? Colors.white,
+                              ),
                             ),
-                            SizedBox(width: 8.w),
                           ],
-                          Text(
-                            widget.text,
-                            style: AppTextStyles.cairo16w700.copyWith(
-                              color: widget.textColor ?? Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+              ),
             ),
           );
         },
@@ -146,6 +158,12 @@ class AnimatedTextField extends StatefulWidget {
   final IconData? suffixIcon;
   final VoidCallback? onSuffixTap;
   final String? Function(String?)? validator;
+  final TextInputAction? textInputAction;
+  final VoidCallback? onEditingComplete;
+  final Function(String)? onFieldSubmitted;
+  final List<String>? autofillHints;
+  final FocusNode? focusNode;
+  final bool showPasswordStrength;
 
   const AnimatedTextField({
     super.key,
@@ -158,6 +176,12 @@ class AnimatedTextField extends StatefulWidget {
     this.suffixIcon,
     this.onSuffixTap,
     this.validator,
+    this.textInputAction,
+    this.onEditingComplete,
+    this.onFieldSubmitted,
+    this.autofillHints,
+    this.focusNode,
+    this.showPasswordStrength = false,
   });
 
   @override
@@ -168,7 +192,7 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation;
-  final FocusNode _focusNode = FocusNode();
+  late FocusNode _focusNode;
   bool _isFocused = false;
   bool _disposed = false;
 
@@ -183,6 +207,9 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
       begin: Colors.grey,
       end: AppColors.primaryColor,
     ).animate(_controller);
+
+    // Use provided focusNode or create a new one
+    _focusNode = widget.focusNode ?? FocusNode();
 
     _focusNode.addListener(() {
       if (!_disposed && mounted) {
@@ -205,11 +232,20 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
       _controller.stop();
     }
     _controller.dispose();
-    _focusNode.dispose();
+    // Only dispose focusNode if we created it
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
   List<String>? _getAutofillHints() {
+    // Use provided autofillHints first
+    if (widget.autofillHints != null) {
+      return widget.autofillHints;
+    }
+
+    // Auto-detect based on field properties
     if (widget.keyboardType == TextInputType.emailAddress) {
       return [AutofillHints.email];
     }
@@ -222,7 +258,30 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
     if (widget.keyboardType == TextInputType.phone) {
       return [AutofillHints.telephoneNumber];
     }
+    if (widget.label.toLowerCase().contains('اسم') ||
+        widget.label.toLowerCase().contains('name')) {
+      return [AutofillHints.name];
+    }
+    if (widget.label.toLowerCase().contains('هاتف') ||
+        widget.label.toLowerCase().contains('phone')) {
+      return [AutofillHints.telephoneNumber];
+    }
     return null;
+  }
+
+  TextInputAction _getTextInputAction() {
+    if (widget.textInputAction != null) {
+      return widget.textInputAction!;
+    }
+
+    // Auto-detect based on field type
+    if (widget.obscureText) {
+      return TextInputAction.done;
+    }
+    if (widget.keyboardType == TextInputType.emailAddress) {
+      return TextInputAction.next;
+    }
+    return TextInputAction.next;
   }
 
   @override
@@ -251,6 +310,19 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
               focusNode: _focusNode,
               obscureText: widget.obscureText,
               keyboardType: widget.keyboardType,
+              textInputAction: _getTextInputAction(),
+              onEditingComplete: widget.onEditingComplete,
+              onFieldSubmitted: widget.onFieldSubmitted,
+              onChanged: (value) {
+                // Trigger password strength widget update
+                if (widget.showPasswordStrength &&
+                    widget.obscureText &&
+                    mounted) {
+                  setState(() {
+                    // This will trigger a rebuild of the password strength widget
+                  });
+                }
+              },
               validator: widget.validator,
               autofillHints: _getAutofillHints(),
               style: AppTextStyles.cairo14w500.copyWith(
@@ -318,6 +390,14 @@ class _AnimatedTextFieldState extends State<AnimatedTextField>
             );
           },
         ),
+
+        // Password Strength Widget
+        if (widget.showPasswordStrength && widget.obscureText)
+          PasswordStrengthWidget(
+            password: widget.controller?.text ?? '',
+            showRequirements:
+                _isFocused || (widget.controller?.text.isNotEmpty ?? false),
+          ),
       ],
     );
   }
@@ -341,7 +421,12 @@ class AnimatedTypewriterText extends StatelessWidget {
       animatedTexts: [
         TypewriterAnimatedText(
           text,
-          textStyle: style ?? AppTextStyles.cairo16w700,
+          textStyle:
+              style ??
+              AppTextStyles.cairo16w700.copyWith(
+                color: Get.isDarkMode ? Colors.white : Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
           speed: speed ?? const Duration(milliseconds: 100),
         ),
       ],

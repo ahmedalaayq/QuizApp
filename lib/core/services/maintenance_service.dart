@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/core/services/connectivity_service.dart';
 import 'package:quiz_app/core/services/logger_service.dart';
@@ -40,24 +41,44 @@ class MaintenanceService extends GetxController {
           .snapshots()
           .listen(
             (snapshot) {
-              if (snapshot.exists && snapshot.data() != null) {
-                final data = snapshot.data()!;
-                final newMaintenanceMode = data['maintenance_mode'] ?? false;
-                final newMessage =
-                    data['maintenance_message'] ?? 'التطبيق قيد الصيانة حالياً';
+              try {
+                if (snapshot.exists && snapshot.data() != null) {
+                  final data = snapshot.data()!;
+                  final newMaintenanceMode = data['maintenance_mode'] ?? false;
+                  final newMessage =
+                      data['maintenance_message'] ??
+                      'التطبيق قيد الصيانة حالياً';
 
-                // Update values
-                isMaintenanceMode.value = newMaintenanceMode;
-                maintenanceMessage.value = newMessage;
+                  // Update values
+                  isMaintenanceMode.value = newMaintenanceMode;
+                  maintenanceMessage.value = newMessage;
 
-                LoggerService.info(
-                  'Maintenance mode updated: $newMaintenanceMode',
-                );
+                  LoggerService.info(
+                    'Maintenance mode updated: $newMaintenanceMode',
+                  );
 
-                // If maintenance mode is enabled, navigate to maintenance screen
-                if (newMaintenanceMode && Get.currentRoute != AppRoutes.maintenanceView) {
-                  Get.offAllNamed(AppRoutes.maintenanceView);
+                  // Only navigate if maintenance mode is enabled and we're not already on maintenance view
+                  if (newMaintenanceMode &&
+                      Get.currentRoute != AppRoutes.maintenanceView &&
+                      Get.context != null) {
+                    // Use a safer navigation approach
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      try {
+                        Get.offAllNamed(AppRoutes.maintenanceView);
+                      } catch (navError) {
+                        LoggerService.error(
+                          'Navigation error in maintenance listener',
+                          navError,
+                        );
+                      }
+                    });
+                  }
                 }
+              } catch (dataError) {
+                LoggerService.error(
+                  'Error processing maintenance data',
+                  dataError,
+                );
               }
             },
             onError: (error) {

@@ -7,30 +7,26 @@ import 'package:quiz_app/core/styles/app_text_styles.dart';
 class ResultCategoryScoresSection extends StatelessWidget {
   final AssessmentResult result;
 
-  const ResultCategoryScoresSection({
-    super.key,
-    required this.result,
-  });
+  const ResultCategoryScoresSection({super.key, required this.result});
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'تفصيل النتائج',
           style: AppTextStyles.cairo18w700.copyWith(
-            color: AppColors.primaryDark,
+            color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
         ),
         SizedBox(height: 15.h),
         ...result.categoryScores.entries.map((entry) {
           return Padding(
             padding: EdgeInsets.only(bottom: 12.h),
-            child: _CategoryScoreBar(
-              category: entry.key,
-              score: entry.value,
-            ),
+            child: _CategoryScoreBar(category: entry.key, score: entry.value),
           );
         }),
       ],
@@ -42,29 +38,24 @@ class _CategoryScoreBar extends StatelessWidget {
   final String category;
   final int score;
 
-  const _CategoryScoreBar({
-    required this.category,
-    required this.score,
-  });
+  const _CategoryScoreBar({required this.category, required this.score});
 
   @override
   Widget build(BuildContext context) {
     const maxScore = 60;
     final percentage = (score / maxScore).clamp(0.0, 1.0);
     final barColor = _getScoreColor(percentage);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: isDarkMode ? const Color(0xFF2D3748) : AppColors.whiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: barColor.withOpacity(0.20),
-          width: 1.5,
-        ),
+        border: Border.all(color: barColor.withOpacity(0.20), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.04),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -79,7 +70,7 @@ class _CategoryScoreBar extends StatelessWidget {
               Text(
                 category,
                 style: AppTextStyles.cairo14w700.copyWith(
-                  color: AppColors.primaryDark,
+                  color: isDarkMode ? Colors.white : AppColors.primaryDark,
                 ),
               ),
               Container(
@@ -90,9 +81,7 @@ class _CategoryScoreBar extends StatelessWidget {
                 ),
                 child: Text(
                   '$score/$maxScore',
-                  style: AppTextStyles.cairo12w700.copyWith(
-                    color: barColor,
-                  ),
+                  style: AppTextStyles.cairo12w700.copyWith(color: barColor),
                 ),
               ),
             ],
@@ -104,7 +93,10 @@ class _CategoryScoreBar extends StatelessWidget {
               value: percentage,
               minHeight: 8.h,
               valueColor: AlwaysStoppedAnimation<Color>(barColor),
-              backgroundColor: AppColors.greyLightColor,
+              backgroundColor:
+                  isDarkMode
+                      ? const Color(0xFF4A5568)
+                      : AppColors.greyLightColor,
             ),
           ),
         ],
@@ -120,4 +112,3 @@ class _CategoryScoreBar extends StatelessWidget {
     return AppColors.criticalColor;
   }
 }
-

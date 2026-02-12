@@ -36,120 +36,101 @@ class _AnimatedSplashViewState extends State<AnimatedSplashView>
   }
 
   void _initAnimations() {
-    // Logo Animation Controller
     _logoController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
-    // Text Animation Controller
     _textController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
-    // Progress Animation Controller
     _progressController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(seconds: 3),
       vsync: this,
     );
 
-    // Logo Animation
     _logoScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
     );
 
-    // Text Animation
-    _textFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeIn));
+    _textFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _textController, curve: Curves.easeIn),
+    );
   }
 
   void _startAnimationSequence() async {
+    final splashStartTime = DateTime.now();
+
     try {
-      // Start logo animation
       await Future.delayed(const Duration(milliseconds: 300));
-      if (!_disposed && mounted) {
-        await _logoController.forward();
-      }
+      if (mounted) await _logoController.forward();
 
-      // Start text animation
       await Future.delayed(const Duration(milliseconds: 200));
-      if (!_disposed && mounted) {
-        await _textController.forward();
-      }
+      if (mounted) await _textController.forward();
 
-      // Start initialization process with progress updates
+      // يبدأ البروجريس يتحرك تدريجياً
+      _progressController.forward();
+
       await _initializeApp();
 
-      // Navigate after animations complete
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (!_disposed && mounted) {
-        _navigateToNextScreen();
+      // ضمان مدة لا تقل عن 3 ثواني
+      final elapsed = DateTime.now().difference(splashStartTime);
+      const minDuration = Duration(seconds: 3);
+
+      if (elapsed < minDuration) {
+        await Future.delayed(minDuration - elapsed);
       }
+
+      if (mounted) _navigateToNextScreen();
     } catch (e, stackTrace) {
-      LoggerService.error('Splash animation sequence error', e, stackTrace);
-      if (!_disposed && mounted) {
-        _navigateToNextScreen();
-      }
+      LoggerService.error('Splash sequence error', e, stackTrace);
+      if (mounted) _navigateToNextScreen();
     }
   }
 
   Future<void> _initializeApp() async {
     try {
-      // Step 1: Initialize Hive (Local Database)
-      _updateStatus('تهيئة قاعدة البيانات المحلية...', 0.2);
-      await Future.delayed(const Duration(milliseconds: 500));
+      _updateStatus('تهيئة قاعدة البيانات...', 0.2);
+      await HiveService.init();
 
-      if (!HiveService.isInitialized) {
-        await HiveService.init();
-      }
-
-      // Step 2: Initialize Firebase
-      _updateStatus('الاتصال بالخدمات السحابية...', 0.4);
-      await Future.delayed(const Duration(milliseconds: 500));
-
+      _updateStatus('الاتصال بالخدمات السحابية...', 0.5);
       await FirebaseService.init();
 
-      // Step 3: Check Authentication
-      _updateStatus('التحقق من حالة تسجيل الدخول...', 0.6);
-      await Future.delayed(const Duration(milliseconds: 500));
+      _updateStatus('التحقق من تسجيل الدخول...', 0.7);
 
-      // Initialize auth service if not already done
       if (!Get.isRegistered<AuthService>()) {
         Get.put(AuthService());
       }
 
-      // Step 4: Load User Preferences
-      _updateStatus('تحميل الإعدادات...', 0.8);
-      await Future.delayed(const Duration(milliseconds: 500));
+      _updateStatus('تحميل الإعدادات...', 0.9);
 
-      // Step 5: Complete
+      await Future.delayed(const Duration(milliseconds: 400));
+
       _updateStatus('اكتمل التحميل', 1.0);
-      await Future.delayed(const Duration(milliseconds: 300));
 
-      LoggerService.info('App initialization completed successfully');
+      LoggerService.info('Initialization completed');
     } catch (e, stackTrace) {
-      LoggerService.error('App initialization error', e, stackTrace);
-      _updateStatus('حدث خطأ في التحميل', 1.0);
-      await Future.delayed(const Duration(milliseconds: 1000));
+      LoggerService.error('Initialization error', e, stackTrace);
+      _updateStatus('حدث خطأ أثناء التحميل', 1.0);
     }
   }
 
   void _updateStatus(String status, double progress) {
-    if (!_disposed && mounted) {
-      setState(() {
-        _currentStatus = status;
-      });
+    if (!mounted) return;
 
-      // Update progress animation
-      _progressController.animateTo(progress);
-    }
+    setState(() => _currentStatus = status);
+
+    _progressController.animateTo(
+      progress,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _navigateToNextScreen() {
-    if (_disposed || !mounted) return;
+    if (!mounted) return;
 
     try {
       final authService = Get.find<AuthService>();
@@ -159,8 +140,7 @@ class _AnimatedSplashViewState extends State<AnimatedSplashView>
       } else {
         Get.offAllNamed(AppRoutes.loginView);
       }
-    } catch (e) {
-      // Fallback navigation
+    } catch (_) {
       Get.offAllNamed(AppRoutes.loginView);
     }
   }
@@ -168,10 +148,6 @@ class _AnimatedSplashViewState extends State<AnimatedSplashView>
   @override
   void dispose() {
     _disposed = true;
-    if (_logoController.isAnimating) _logoController.stop();
-    if (_textController.isAnimating) _textController.stop();
-    if (_progressController.isAnimating) _progressController.stop();
-
     _logoController.dispose();
     _textController.dispose();
     _progressController.dispose();
@@ -190,195 +166,119 @@ class _AnimatedSplashViewState extends State<AnimatedSplashView>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors:
-                isDarkMode
-                    ? [
-                      const Color(0xFF1A1A2E),
-                      const Color(0xFF16213E),
-                      const Color(0xFF0F3460),
-                    ]
-                    : [
-                      AppColors.primaryColor,
-                      AppColors.primaryColor.withValues(alpha: 0.8),
-                      AppColors.secondaryColor,
-                    ],
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF1A1A2E),
+                    const Color(0xFF16213E),
+                    const Color(0xFF0F3460),
+                  ]
+                : [
+                    AppColors.primaryColor,
+                    AppColors.primaryColor.withValues(alpha: 0.85),
+                    AppColors.secondaryColor,
+                  ],
           ),
         ),
         child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(flex: 2),
+              const Spacer(),
 
-              // Animated Logo
+              /// Logo
               AnimatedBuilder(
                 animation: _logoScaleAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _logoScaleAnimation.value,
-                    child: Container(
-                      width: 120.w,
-                      height: 120.w,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.psychology,
-                        color: AppColors.primaryColor,
-                        size: 60.r,
-                      ),
+                builder: (_, __) => Transform.scale(
+                  scale: _logoScaleAnimation.value,
+                  child: Container(
+                    width: 120.w,
+                    height: 120.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
-                  );
-                },
+                    child: Icon(
+                      Icons.psychology,
+                      color: AppColors.primaryColor,
+                      size: 60.r,
+                    ),
+                  ),
+                ),
               ),
 
               SizedBox(height: 40.h),
 
-              // Animated App Name
+              /// Title
               AnimatedBuilder(
                 animation: _textFadeAnimation,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _textFadeAnimation.value,
-                    child: Column(
-                      children: [
-                        Text(
-                          'منصة التقييم النفسي',
-                          style: AppTextStyles.cairo28w700.copyWith(
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
+                builder: (_, __) => Opacity(
+                  opacity: _textFadeAnimation.value,
+                  child: Column(
+                    children: [
+                      Text(
+                        'منصة التقييم النفسي',
+                        style: AppTextStyles.cairo28w700
+                            .copyWith(color: Colors.white),
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        'تقييم شامل ودقيق للحالة النفسية',
+                        style: AppTextStyles.cairo16w700.copyWith(
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          'تقييم شامل ودقيق للحالة النفسية',
-                          style: AppTextStyles.cairo16w700.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
-              const Spacer(flex: 2),
+              const Spacer(),
 
-              // Animated Progress Bar with Status
+              /// Status + Progress
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 60.w),
                 child: Column(
                   children: [
-                    // Status Text
-                    AnimatedBuilder(
-                      animation: _textFadeAnimation,
-                      builder: (context, child) {
-                        return Opacity(
-                          opacity: _textFadeAnimation.value,
-                          child: Text(
-                            _currentStatus,
-                            style: AppTextStyles.cairo14w600.copyWith(
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      },
+                    Text(
+                      _currentStatus,
+                      style: AppTextStyles.cairo14w600.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
                     ),
                     SizedBox(height: 16.h),
-
-                    // Progress Bar
                     AnimatedBuilder(
                       animation: _progressController,
-                      builder: (context, child) {
-                        return Container(
-                          width: double.infinity,
-                          height: 6.h,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(3.r),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: _progressController.value,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.white,
-                                    Colors.white.withValues(alpha: 0.8),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(3.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.white.withValues(alpha: 0.5),
-                                    blurRadius: 4,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                      builder: (_, __) => LinearProgressIndicator(
+                        value: _progressController.value,
+                        backgroundColor:
+                            Colors.white.withValues(alpha: 0.3),
+                        valueColor:
+                            const AlwaysStoppedAnimation<Color>(Colors.white),
+                        minHeight: 6.h,
+                      ),
                     ),
                     SizedBox(height: 12.h),
-
-                    // Progress Percentage
                     AnimatedBuilder(
                       animation: _progressController,
-                      builder: (context, child) {
-                        return Text(
-                          '${(_progressController.value * 100).toInt()}%',
-                          style: AppTextStyles.cairo12w600.copyWith(
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        );
-                      },
+                      builder: (_, __) => Text(
+                        '${(_progressController.value * 100).toInt()}%',
+                        style: AppTextStyles.cairo12w600.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
 
               SizedBox(height: 60.h),
-
-              // Loading Dots Animation
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
-                  return AnimatedBuilder(
-                    animation: _progressController,
-                    builder: (context, child) {
-                      final delay = index * 0.2;
-                      final progress = (_progressController.value - delay)
-                          .clamp(0.0, 1.0);
-                      final scale = 0.5 + (0.5 * progress);
-
-                      return Container(
-                        width: 8.w * scale,
-                        height: 8.w * scale,
-                        margin: EdgeInsets.symmetric(horizontal: 4.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: progress),
-                          shape: BoxShape.circle,
-                        ),
-                      );
-                    },
-                  );
-                }),
-              ),
-
-              SizedBox(height: 40.h),
             ],
           ),
         ),

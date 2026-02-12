@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '685702362725',
     projectId: 'quizapp-30606',
     storageBucket: 'quizapp-30606.firebasestorage.app',
-    iosBundleId: 'com.example.quizApp',
+    iosBundleId: 'com.alaayq.moashir',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '685702362725',
     projectId: 'quizapp-30606',
     storageBucket: 'quizapp-30606.firebasestorage.app',
-    iosBundleId: 'com.example.quizApp',
+    iosBundleId: 'com.alaayq.moashir',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

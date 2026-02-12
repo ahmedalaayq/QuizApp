@@ -528,7 +528,7 @@ class StatisticsController extends GetxController {
 
       // Group assessments by their ID
       for (final doc in assessmentsQuery.docs) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final assessmentId = data['id'] ?? doc.id;
 
         if (!assessmentGroups.containsKey(assessmentId)) {

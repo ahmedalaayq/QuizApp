@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 منصة التقييم النفسي
+# 🧠 مؤشر للتقييم النفسي
 ## QuizApp - Psychological Assessment Platform
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.7+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)

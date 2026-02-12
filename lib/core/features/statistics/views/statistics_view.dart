@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quiz_app/core/features/statistics/controller/statistics_controller.dart';
 import 'package:quiz_app/core/features/statistics/widgets/progress_chart_card.dart';
 import 'package:quiz_app/core/features/statistics/widgets/statistics_header.dart';
@@ -11,6 +12,7 @@ import 'package:quiz_app/core/services/connectivity_service.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
 import 'package:quiz_app/core/styles/app_text_styles.dart';
 import 'package:quiz_app/core/widgets/error_widgets.dart';
+import 'package:quiz_app/core/database/models/assessment_history_model.dart';
 
 class StatisticsView extends StatelessWidget {
   const StatisticsView({super.key});
@@ -84,115 +86,122 @@ class StatisticsView extends StatelessWidget {
           ],
         ],
       ),
-      body: Obx(() {
-        // Check user permissions
-        if (authService.isStudent) {
-          return _buildStudentView(controller, isDarkMode);
-        }
-
-        if (controller.isLoading.value) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.primaryColor,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'جاري تحميل الإحصائيات...',
-                  style: AppTextStyles.cairo16w600.copyWith(
-                    color:
-                        isDarkMode ? const Color(0xFFA0AEC0) : Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        // Show error state
-        if (controller.error.value.isNotEmpty) {
-          return Column(
-            children: [
-              // Connectivity Status Banner
-              Obx(
-                () =>
-                    !ConnectivityService.instance.isConnected.value
-                        ? Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(12.w),
-                          color: Colors.orange.withValues(alpha: 0.1),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.wifi_off,
-                                color: Colors.orange,
-                                size: 20.r,
-                              ),
-                              SizedBox(width: 8.w),
-                              Expanded(
-                                child: Text(
-                                  'وضع عدم الاتصال - قد تكون البيانات غير محدثة',
-                                  style: AppTextStyles.cairo12w500.copyWith(
-                                    color: Colors.orange,
-                                  ),
-                                ),
-                              ),
-                            ],
+      body:
+          authService.isStudent
+              ? _buildStudentView(controller, isDarkMode)
+              : StreamBuilder<QuerySnapshot>(
+                stream: controller.getAssessmentsStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primaryColor,
+                            ),
                           ),
-                        )
-                        : const SizedBox.shrink(),
-              ),
-              Expanded(
-                child: LoadingErrorWidget(
-                  message: controller.error.value,
-                  onRetry: () => controller.forceRefresh(),
-                ),
-              ),
-            ],
-          );
-        }
+                          SizedBox(height: 16.h),
+                          Text(
+                            'جاري تحميل الإحصائيات...',
+                            style: AppTextStyles.cairo16w600.copyWith(
+                              color:
+                                  isDarkMode
+                                      ? const Color(0xFFA0AEC0)
+                                      : Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-        if (controller.assessments.isEmpty) {
-          return _buildEmptyState(isDarkMode);
-        }
+                  if (snapshot.hasError) {
+                    return Column(
+                      children: [
+                        // Connectivity Status Banner
+                        Obx(
+                          () =>
+                              !ConnectivityService.instance.isConnected.value
+                                  ? Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.all(12.w),
+                                    color: Colors.orange.withValues(alpha: 0.1),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.wifi_off,
+                                          color: Colors.orange,
+                                          size: 20.r,
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: Text(
+                                            'وضع عدم الاتصال - قد تكون البيانات غير محدثة',
+                                            style: AppTextStyles.cairo12w500
+                                                .copyWith(color: Colors.orange),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  : const SizedBox.shrink(),
+                        ),
+                        Expanded(
+                          child: LoadingErrorWidget(
+                            message: 'خطأ في تحميل البيانات: ${snapshot.error}',
+                            onRetry: () => controller.forceRefresh(),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
 
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors:
-                  isDarkMode
-                      ? [const Color(0xFF0F1419), const Color(0xFF1A202C)]
-                      : [const Color(0xFFF8FAFC), Colors.white],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: RefreshIndicator(
-            onRefresh: () => controller.forceRefresh(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const StatisticsHeader(),
-                  SizedBox(height: 20.h),
-                  const StatisticsOverviewCards(),
-                  SizedBox(height: 24.h),
-                  const ProgressChartCard(),
-                  SizedBox(height: 24.h),
-                  const RecentAssessmentsList(),
-                  SizedBox(height: 20.h), // Extra padding at bottom
-                ],
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return _buildEmptyState(isDarkMode);
+                  }
+
+                  // Process the data from stream
+                  _processStreamData(snapshot.data!, controller);
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors:
+                            isDarkMode
+                                ? [
+                                  const Color(0xFF0F1419),
+                                  const Color(0xFF1A202C),
+                                ]
+                                : [const Color(0xFFF8FAFC), Colors.white],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: RefreshIndicator(
+                      onRefresh: () => controller.forceRefresh(),
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.all(16.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const StatisticsHeader(),
+                            SizedBox(height: 20.h),
+                            const StatisticsOverviewCards(),
+                            SizedBox(height: 24.h),
+                            const ProgressChartCard(),
+                            SizedBox(height: 24.h),
+                            const RecentAssessmentsList(),
+                            SizedBox(height: 20.h),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            ),
-          ),
-        );
-      }),
     );
   }
 
@@ -408,5 +417,98 @@ class StatisticsView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Process data from Firestore stream
+  void _processStreamData(
+    QuerySnapshot snapshot,
+    StatisticsController controller,
+  ) {
+    final List<AssessmentHistory> firestoreAssessments = [];
+    final Set<String> seenIds =
+        <String>{}; // Track seen IDs to prevent duplicates
+
+    for (final doc in snapshot.docs) {
+      try {
+        final data = doc.data() as Map<String, dynamic>;
+
+        // Check for duplicates using assessment ID or document ID
+        final assessmentId = data['id'] ?? doc.id;
+        if (seenIds.contains(assessmentId)) {
+          continue;
+        }
+        seenIds.add(assessmentId);
+
+        // Enhanced data parsing with multiple fallbacks
+        DateTime completionDate;
+        try {
+          if (data['createdAt'] != null) {
+            completionDate = (data['createdAt'] as Timestamp).toDate();
+          } else if (data['timestamp'] != null) {
+            completionDate = (data['timestamp'] as Timestamp).toDate();
+          } else if (data['completedAt'] != null) {
+            completionDate = (data['completedAt'] as Timestamp).toDate();
+          } else {
+            completionDate = DateTime.now();
+          }
+        } catch (e) {
+          completionDate = DateTime.now();
+        }
+
+        // Convert Firestore data to AssessmentHistory
+        final assessment = AssessmentHistory(
+          id: doc.id,
+          assessmentType:
+              data['assessmentType'] ??
+              data['assessmentId'] ??
+              data['type'] ??
+              'unknown',
+          assessmentTitle:
+              data['assessmentName'] ??
+              data['assessmentTitle'] ??
+              data['title'] ??
+              'اختبار غير محدد',
+          completionDate: completionDate,
+          totalScore: (data['score'] ?? data['totalScore'] ?? 0).toInt(),
+          categoryScores: Map<String, dynamic>.from(
+            data['categoryScores'] ?? data['scores'] ?? {},
+          ),
+          overallSeverity:
+              data['severity'] ??
+              data['overallSeverity'] ??
+              data['level'] ??
+              'غير محدد',
+          interpretation:
+              data['interpretation'] ??
+              data['result'] ??
+              'لا توجد تفسيرات متاحة',
+          recommendations: List<String>.from(
+            data['recommendations'] ?? data['suggestions'] ?? [],
+          ),
+          durationInSeconds:
+              (data['durationInSeconds'] ?? data['duration'] ?? 0).toInt(),
+          userId: data['userId'] ?? data['user_id'],
+          userName:
+              data['userName'] ??
+              data['user_name'] ??
+              data['name'] ??
+              'مستخدم غير معروف',
+        );
+
+        firestoreAssessments.add(assessment);
+      } catch (e) {
+        // Skip invalid documents
+        continue;
+      }
+    }
+
+    // Sort by completion date
+    firestoreAssessments.sort(
+      (a, b) => b.completionDate.compareTo(a.completionDate),
+    );
+
+    // Update controller data
+    controller.assessments.value = firestoreAssessments;
+    controller.calculateStatistics();
   }
 }

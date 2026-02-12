@@ -8,6 +8,7 @@ import 'package:quiz_app/core/services/auth_service.dart';
 import 'package:quiz_app/core/services/connectivity_service.dart';
 import 'package:quiz_app/core/services/logger_service.dart';
 import 'package:quiz_app/core/styles/app_colors.dart';
+import 'package:quiz_app/core/styles/app_text_styles.dart';
 
 class StatisticsController extends GetxController {
   final RxList<AssessmentHistory> assessments = <AssessmentHistory>[].obs;
@@ -24,6 +25,41 @@ class StatisticsController extends GetxController {
   void onInit() {
     super.onInit();
     loadStatistics();
+  }
+
+  // Get assessments stream for real-time updates
+  Stream<QuerySnapshot> getAssessmentsStream() {
+    final currentUser = _authService.currentUser.value;
+    if (currentUser == null) {
+      throw Exception('المستخدم غير مسجل الدخول');
+    }
+
+    Query query = _firestore.collection('assessment_results');
+    final userRole = _authService.userRole.value;
+
+    // For students, only show their own assessments
+    if (userRole == 'student') {
+      query = query.where('userId', isEqualTo: currentUser.uid);
+    }
+
+    // Try to order by createdAt, fallback to no ordering
+    try {
+      return query
+          .orderBy('createdAt', descending: true)
+          .limit(100)
+          .snapshots();
+    } catch (e) {
+      LoggerService.warning('Failed to order stream by createdAt: $e');
+      try {
+        return query
+            .orderBy('timestamp', descending: true)
+            .limit(100)
+            .snapshots();
+      } catch (e2) {
+        LoggerService.warning('Failed to order stream by timestamp: $e2');
+        return query.limit(100).snapshots();
+      }
+    }
   }
 
   Future<void> loadStatistics() async {
@@ -58,7 +94,7 @@ class StatisticsController extends GetxController {
         }
       }
 
-      _calculateStatistics();
+      calculateStatistics();
       LoggerService.info(
         'Statistics calculation completed. Total assessments: ${assessments.length}',
       );
@@ -82,7 +118,7 @@ class StatisticsController extends GetxController {
         try {
           LoggerService.info('Attempting fallback to local data...');
           _loadFromLocal();
-          _calculateStatistics();
+          calculateStatistics();
           if (assessments.isNotEmpty) {
             error.value =
                 'تم تحميل البيانات المحفوظة محلياً - قد لا تكون محدثة';
@@ -296,7 +332,7 @@ class StatisticsController extends GetxController {
     }
   }
 
-  void _calculateStatistics() {
+  void calculateStatistics() {
     if (assessments.isEmpty) {
       totalAssessments.value = 0;
       averageScore.value = 0.0;
@@ -366,78 +402,103 @@ class StatisticsController extends GetxController {
       return;
     }
 
+    final bool isDark = Get.isDarkMode;
+
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          color: isDark ? Colors.grey[900]!.withOpacity(0.95) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -4),
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+              blurRadius: 12,
+              offset: const Offset(0, -6),
             ),
           ],
         ),
-        child: Wrap(
-          children: [
-            // Title
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Center(
-                child: Text(
-                  'تصدير التقرير',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryDark,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag Handle
+              Container(
+                width: 40,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              // Title
+              Text(
+                'تصدير التقرير',
+                style: AppTextStyles.cairo18w600.copyWith(
+                  color: isDark ? Colors.white : AppColors.greyDarkColor,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(),
+
+              const SizedBox(height: 12),
+
+              /// Options
+              _buildSheetOption(
+                icon: Icons.picture_as_pdf,
+                iconColor: Colors.redAccent,
+                title: 'تصدير تقرير شامل',
+                subtitle: 'احصل على نسخة PDF كاملة لجميع التقييمات',
+                onTap: () async {
+                  Get.back();
+                  await PdfService.exportFullReport(assessments);
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildSheetOption(
+                icon: Icons.print,
+                iconColor: Colors.blueAccent,
+                title: 'طباعة آخر تقرير',
+                subtitle: 'اطبع آخر تقييم تم حفظه',
+                onTap: () async {
+                  Get.back();
+                  if (assessments.isNotEmpty) {
+                    await PdfService.printReport(assessments.first);
+                  }
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Cancel Button
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor:
+                        isDark
+                            ? Colors.white12
+                            : AppColors.greyLightColor.withOpacity(0.3),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: () => Get.back(),
+                  child: Text(
+                    'إلغاء',
+                    style: AppTextStyles.cairo16w600.copyWith(
+                      color: isDark ? Colors.redAccent : AppColors.redColor,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const Divider(),
 
-            // Export Full Report
-            ListTile(
-              leading: const Icon(
-                Icons.picture_as_pdf,
-                color: Colors.redAccent,
-              ),
-              title: const Text('تصدير تقرير شامل'),
-              onTap: () async {
-                Get.back();
-                await PdfService.exportFullReport(assessments);
-              },
-            ),
-
-            // Print Last Report
-            ListTile(
-              leading: const Icon(Icons.print, color: Colors.blueAccent),
-              title: const Text('طباعة آخر تقرير'),
-              onTap: () async {
-                Get.back();
-                if (assessments.isNotEmpty) {
-                  await PdfService.printReport(assessments.first);
-                }
-              },
-            ),
-
-            const SizedBox(height: 8),
-
-            // Cancel Button
-            TextButton(
-              onPressed: () => Get.back(),
-              child: Text(
-                'إلغاء',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.redColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
       isScrollControlled: true,
@@ -531,4 +592,59 @@ class StatisticsController extends GetxController {
       );
     }
   }
+}
+
+Widget _buildSheetOption({
+  required IconData icon,
+  required Color iconColor,
+  required String title,
+  required String subtitle,
+  required VoidCallback onTap,
+}) {
+  return Material(
+    color: Get.isDarkMode ? AppColors.greyDarkColor : AppColors.whiteColor,
+    borderRadius: BorderRadius.circular(18),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: iconColor, size: 26),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.cairo16w600.copyWith(
+                      color:
+                          Get.isDarkMode
+                              ? AppColors.whiteColor
+                              : AppColors.greyDarkColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          ],
+        ),
+      ),
+    ),
+  );
 }

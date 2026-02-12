@@ -50,12 +50,18 @@ class AdminUsersTab extends StatelessWidget {
   }
 
   Widget _buildUsersHeader() {
+    final authService = Get.find<AuthService>();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
           child: Text(
-            'إدارة المستخدمين',
+            authService.isTherapist &&
+                    !authService.isAdmin &&
+                    !authService.isSuperAdmin
+                ? 'إدارة الطلاب'
+                : 'إدارة المستخدمين',
             style: AppTextStyles.cairo18w700.copyWith(
               color: isDarkMode ? Colors.white : AppColors.primaryDark,
             ),
@@ -63,18 +69,22 @@ class AdminUsersTab extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8.w),
-        ElevatedButton.icon(
-          onPressed: () => _showAddUserDialog(),
-          icon: Icon(Icons.add, size: 18.r),
-          label: const Text('إضافة مستخدم'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryColor,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.r),
+        // Only show add user button for admins and super admins
+        if (!authService.isTherapist ||
+            authService.isAdmin ||
+            authService.isSuperAdmin)
+          ElevatedButton.icon(
+            onPressed: () => _showAddUserDialog(),
+            icon: Icon(Icons.add, size: 18.r),
+            label: const Text('إضافة مستخدم'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -252,11 +262,36 @@ class AdminUsersTab extends StatelessWidget {
   }
 
   Widget _buildUsersList() {
+    final authService = Get.find<AuthService>();
+
     return Obx(() {
-      if (controller.filteredUsers.isEmpty) {
-        return const EmptyStateWidget(
-          title: 'لا يوجد مستخدمين',
-          message: 'لم يتم العثور على أي مستخدمين',
+      // Filter users based on role permissions
+      List<Map<String, dynamic>> usersToShow = controller.filteredUsers;
+
+      // For therapists: only show students
+      if (authService.isTherapist &&
+          !authService.isAdmin &&
+          !authService.isSuperAdmin) {
+        usersToShow =
+            controller.filteredUsers
+                .where((user) => (user['role'] ?? 'student') == 'student')
+                .toList();
+      }
+
+      if (usersToShow.isEmpty) {
+        return EmptyStateWidget(
+          title:
+              authService.isTherapist &&
+                      !authService.isAdmin &&
+                      !authService.isSuperAdmin
+                  ? 'لا يوجد طلاب'
+                  : 'لا يوجد مستخدمين',
+          message:
+              authService.isTherapist &&
+                      !authService.isAdmin &&
+                      !authService.isSuperAdmin
+                  ? 'لم يتم العثور على أي طلاب'
+                  : 'لم يتم العثور على أي مستخدمين',
           icon: Icons.people_outline,
         );
       }
@@ -264,9 +299,9 @@ class AdminUsersTab extends StatelessWidget {
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: controller.filteredUsers.length,
+        itemCount: usersToShow.length,
         itemBuilder: (context, index) {
-          final user = controller.filteredUsers[index];
+          final user = usersToShow[index];
           return _buildUserTile(user);
         },
       );

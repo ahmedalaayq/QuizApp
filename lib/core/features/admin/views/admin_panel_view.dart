@@ -22,15 +22,25 @@ class AdminPanelView extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Determine available tabs based on user role
-    final List<Tab> availableTabs = [
-      const Tab(icon: Icon(Icons.dashboard), text: 'لوحة المعلومات'),
-      const Tab(icon: Icon(Icons.people), text: 'المستخدمين'),
-      if (authService.isSuperAdmin)
-        const Tab(icon: Icon(Icons.settings), text: 'إعدادات النظام'),
-      const Tab(icon: Icon(Icons.analytics), text: 'التحليلات'),
-      if (authService.isSuperAdmin)
-        const Tab(icon: Icon(Icons.notifications), text: 'الإشعارات'),
-    ];
+    final List<Tab> availableTabs = [];
+
+    // For therapists: only show students tab
+    if (authService.isTherapist &&
+        !authService.isAdmin &&
+        !authService.isSuperAdmin) {
+      availableTabs.add(const Tab(icon: Icon(Icons.people), text: 'الطلاب'));
+    } else {
+      // For admins and super admins: show all tabs
+      availableTabs.addAll([
+        const Tab(icon: Icon(Icons.dashboard), text: 'لوحة المعلومات'),
+        const Tab(icon: Icon(Icons.people), text: 'المستخدمين'),
+        if (authService.isSuperAdmin)
+          const Tab(icon: Icon(Icons.settings), text: 'إعدادات النظام'),
+        const Tab(icon: Icon(Icons.analytics), text: 'التحليلات'),
+        if (authService.isSuperAdmin)
+          const Tab(icon: Icon(Icons.notifications), text: 'الإشعارات'),
+      ]);
+    }
 
     return DefaultTabController(
       length: availableTabs.length,
@@ -116,20 +126,34 @@ class AdminPanelView extends StatelessWidget {
 
           return TabBarView(
             children: [
-              AdminDashboardTab(controller: controller, isDarkMode: isDarkMode),
-              AdminUsersTab(controller: controller, isDarkMode: isDarkMode),
-              if (authService.isSuperAdmin)
-                AdminSystemSettingsTab(
-                  controller: controller,
-                  isDarkMode: isDarkMode,
-                  authService: authService,
-                ),
-              AdminAnalyticsTab(controller: controller, isDarkMode: isDarkMode),
-              if (authService.isSuperAdmin)
-                AdminNotificationsTab(
+              // For therapists: only show users tab (students)
+              if (authService.isTherapist &&
+                  !authService.isAdmin &&
+                  !authService.isSuperAdmin)
+                AdminUsersTab(controller: controller, isDarkMode: isDarkMode)
+              else ...[
+                // For admins and super admins: show all tabs
+                AdminDashboardTab(
                   controller: controller,
                   isDarkMode: isDarkMode,
                 ),
+                AdminUsersTab(controller: controller, isDarkMode: isDarkMode),
+                if (authService.isSuperAdmin)
+                  AdminSystemSettingsTab(
+                    controller: controller,
+                    isDarkMode: isDarkMode,
+                    authService: authService,
+                  ),
+                AdminAnalyticsTab(
+                  controller: controller,
+                  isDarkMode: isDarkMode,
+                ),
+                if (authService.isSuperAdmin)
+                  AdminNotificationsTab(
+                    controller: controller,
+                    isDarkMode: isDarkMode,
+                  ),
+              ],
             ],
           );
         }),
